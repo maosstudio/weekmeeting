@@ -491,16 +491,27 @@ function gasGet(params) {
 }
 
 async function gasSave(weeks) {
-  // POST 傳送：不受 URL 長度限制，可承載大量資料
-  const res = await fetch(apiUrl, {
-    method: 'POST',
-    // Google Apps Script 不支援 application/json 的 preflight，
-    // 改用 text/plain 可跳過 CORS preflight（no-cors 模式）
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'saveAll', weeks })
-  });
-  // no-cors 模式下 response 是 opaque，無法讀取內容，視為成功
+  // 分批 JSONP GET：每批約 1200 字元，完全繞過 CORS 與 POST 問題
+  const json = JSON.stringify(weeks);
+  const CHUNK = 1200;
+  const total = Math.ceil(json.length / CHUNK);
+  const batchId = 'b' + Date.now();
+
+  for (let i = 0; i < total; i++) {
+    const chunk = json.slice(i * CHUNK, (i + 1) * CHUNK);
+    const encoded = encodeURIComponent(chunk);
+    const res = await gasGet({
+      action: 'saveChunk',
+      batchId,
+      index: i,
+      total,
+      chunk: encoded
+    });
+    if (!res.ok) throw new Error(res.error || 'saveChunk failed at ' + i);
+  }
+  // 通知後端組裝並寫入
+  const res = await gasGet({ action: 'commitChunks', batchId, total });
+  if (!res.ok) throw new Error(res.error || 'commitChunks failed');
   return { ok: true };
 }
 
