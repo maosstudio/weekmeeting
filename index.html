@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>週會任務管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F2;
+    --surface: #FFFFFF;
+    --surface2: #F0EEE9;
+    --border: #E2DFD8;
+    --border-strong: #C8C4BB;
+    --text: #1A1916;
+    --text-2: #6B6860;
+    --text-3: #9E9C96;
+    --accent: #2D5016;
+    --accent-bg: #EAF2DE;
+    --accent-text: #2D5016;
+    --danger: #7A1F1F;
+    --danger-bg: #FDF0F0;
+    --warn-bg: #FEF9EC;
+    --warn-text: #7A5210;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+    --font: 'Noto Sans TC', system-ui, sans-serif;
+  }
+
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* ── Layout ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: var(--surface);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 20; overflow-y: auto;
+  }
+  .sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); }
+  .app-name { font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .app-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+  .sidebar-section { padding: 12px 10px 4px; }
+  .sidebar-section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); padding: 0 8px; margin-bottom: 4px; }
+
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: var(--radius-sm); font-size: 13px; color: var(--text-2); cursor: pointer; border: none; background: none; width: 100%; text-align: left; transition: background 0.12s, color 0.12s; font-family: var(--font); }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--accent-bg); color: var(--accent-text); font-weight: 500; }
+  .week-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .week-pct { font-size: 10px; font-weight: 600; color: var(--text-3); flex-shrink: 0; }
+  .nav-item.active .week-pct { color: var(--accent-text); }
+
+  .sidebar-add-btn { margin: 8px 10px 16px; padding: 7px 12px; border-radius: var(--radius-sm); border: 1px dashed var(--border-strong); background: none; color: var(--text-3); font-size: 12px; cursor: pointer; width: calc(100% - 20px); display: flex; align-items: center; gap: 6px; transition: all 0.12s; font-family: var(--font); }
+  .sidebar-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+
+  .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; gap: 12px; }
+  .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .topbar-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-sub { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .view-toggle { display: flex; background: var(--surface2); border-radius: var(--radius-sm); padding: 3px; gap: 2px; }
+  .view-btn { padding: 5px 12px; border: none; background: none; border-radius: 4px; font-size: 12px; font-weight: 500; color: var(--text-2); cursor: pointer; transition: all 0.12s; font-family: var(--font); display: flex; align-items: center; gap: 5px; }
+  .view-btn:hover { color: var(--text); }
+  .view-btn.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+  .sync-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-3); }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); transition: background 0.3s; flex-shrink: 0; }
+  .sync-dot.synced { background: #5a9e2e; }
+  .sync-dot.syncing { background: #d4a520; animation: pulse 0.8s ease-in-out infinite; }
+  .sync-dot.error { background: #c03030; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .refresh-btn { padding: 5px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: none; color: var(--text-2); font-size: 12px; cursor: pointer; font-family: var(--font); display: flex; align-items: center; gap: 4px; transition: all 0.12s; }
+  .refresh-btn:hover { background: var(--surface2); color: var(--text); }
+
+  /* ── Pages ── */
+  .page { display: none; padding: 28px; }
+  .page.active { display: block; }
+
+  /* ── Setup banner ── */
+  .setup-banner { background: var(--warn-bg); border: 1px solid #E6C97A; border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 12px; }
+  .setup-banner.hidden { display: none; }
+  .setup-banner svg { flex-shrink: 0; margin-top: 1px; }
+  .setup-banner-text { font-size: 13px; color: var(--warn-text); }
+  .setup-banner-text strong { font-weight: 600; }
+  .setup-link { color: var(--accent); font-weight: 500; cursor: pointer; text-decoration: underline; }
+
+  /* ── Member cards ── */
+  .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .member-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+  .card-head { padding: 14px 16px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .card-head-info { flex: 1; min-width: 0; }
+  .card-member-name { font-size: 14px; font-weight: 600; }
+  .card-progress-row { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+  .mini-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .mini-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; }
+  .mini-pct { font-size: 10px; color: var(--text-3); font-weight: 500; flex-shrink: 0; }
+
+  .card-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .add-row { display: flex; gap: 6px; }
+  .add-input { flex: 1; font-size: 13px; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); outline: none; font-family: var(--font); transition: border-color 0.12s, background 0.12s; }
+  .add-input:focus { border-color: var(--accent); background: var(--surface); }
+  .add-input::placeholder { color: var(--text-3); }
+  .add-btn { padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font); transition: all 0.12s; white-space: nowrap; }
+  .add-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+  .task-list { display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto; }
+  .task-list::-webkit-scrollbar { width: 4px; }
+  .task-list::-webkit-scrollbar-track { background: transparent; }
+  .task-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .task-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 9px; border-radius: var(--radius-sm); border: 1px solid transparent; background: var(--surface2); transition: all 0.12s; }
+  .task-item:hover { border-color: var(--border); }
+  .task-item.done { opacity: 0.5; }
+  .task-check { width: 15px; height: 15px; margin-top: 2px; flex-shrink: 0; cursor: pointer; accent-color: var(--accent); }
+  .task-label { font-size: 13px; color: var(--text); flex: 1; line-height: 1.5; word-break: break-all; }
+  .task-item.done .task-label { text-decoration: line-through; color: var(--text-3); }
+  .task-del { background: none; border: none; color: var(--text-3); cursor: pointer; padding: 1px 3px; font-size: 14px; line-height: 1; border-radius: 3px; opacity: 0; transition: opacity 0.1s; flex-shrink: 0; }
+  .task-item:hover .task-del { opacity: 1; }
+  .task-del:hover { color: var(--danger); background: var(--danger-bg); }
+  .empty-state { font-size: 12px; color: var(--text-3); text-align: center; padding: 16px 0 8px; }
+
+  /* ── Overview ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: var(--shadow); }
+  .stat-label { font-size: 11px; color: var(--text-3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 600; line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+  .overall-bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .overall-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s; }
+
+  .overview-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  .overview-table { width: 100%; border-collapse: collapse; }
+  .overview-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  .overview-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .overview-table tr:last-child td { border-bottom: none; }
+  .overview-table tr:hover td { background: var(--surface2); }
+  .member-cell { display: flex; align-items: center; gap: 9px; }
+  .member-cell .name { font-size: 13px; font-weight: 600; }
+  .member-cell .count { font-size: 11px; color: var(--text-3); }
+  .task-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { font-size: 11px; padding: 3px 9px; border-radius: 100px; border: 1px solid var(--border); color: var(--text-2); background: var(--surface2); }
+  .chip.done { text-decoration: line-through; opacity: 0.45; }
+  .row-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 100px; }
+  .row-bar { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .row-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s; }
+  .row-pct { font-size: 11px; font-weight: 600; color: var(--text-3); min-width: 28px; text-align: right; }
+
+  /* ── Modal ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(2px); animation: fadeIn 0.15s ease; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 24px; width: 360px; box-shadow: var(--shadow-md); animation: slideUp 0.15s ease; }
+  @keyframes slideUp { from{transform:translateY(8px);opacity:0} to{transform:none;opacity:1} }
+  .modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--text-2); margin-bottom: 16px; line-height: 1.6; }
+  .modal label { font-size: 12px; font-weight: 500; color: var(--text-2); display: block; margin-bottom: 4px; }
+  .modal input, .modal textarea { width: 100%; font-size: 13px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); outline: none; font-family: var(--font); margin-bottom: 12px; transition: border-color 0.12s; }
+  .modal input:focus, .modal textarea:focus { border-color: var(--accent); background: var(--surface); }
+  .modal textarea { resize: vertical; min-height: 60px; }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  .btn { padding: 8px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font); border: 1px solid var(--border); background: var(--surface); color: var(--text-2); transition: all 0.12s; }
+  .btn:hover { background: var(--surface2); color: var(--text); }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { background: #3d6b20; border-color: #3d6b20; }
+
+  /* ── Toast ── */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; font-size: 13px; padding: 10px 16px; border-radius: var(--radius-md); box-shadow: var(--shadow-md); z-index: 200; animation: toastIn 0.2s ease; pointer-events: none; }
+  @keyframes toastIn { from{transform:translateY(10px);opacity:0} to{transform:none;opacity:1} }
+
+  /* ── Config screen ── */
+  .config-screen { max-width: 560px; margin: 60px auto; padding: 40px; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-md); }
+  .config-screen h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  .config-screen p { font-size: 14px; color: var(--text-2); margin-bottom: 24px; line-height: 1.7; }
+  .config-screen label { font-size: 13px; font-weight: 500; color: var(--text-2); display: block; margin-bottom: 6px; }
+  .config-screen input { width: 100%; font-size: 14px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); outline: none; font-family: var(--font); margin-bottom: 16px; }
+  .config-screen input:focus { border-color: var(--accent); background: var(--surface); }
+  .config-hint { font-size: 12px; color: var(--text-3); margin-top: -10px; margin-bottom: 16px; }
+
+  /* ── Mobile ── */
+  @media (max-width: 700px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.2s; }
+    .sidebar.open { transform: none; box-shadow: var(--shadow-md); }
+    .main { margin-left: 0; }
+    .mobile-menu-btn { display: flex !important; }
+    .page { padding: 16px; }
+    .member-grid { grid-template-columns: 1fr; }
+    .config-screen { margin: 20px; padding: 24px; }
+  }
+  .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: var(--text); }
+  .mobile-overlay { display: none; position: fixed; inset: 0; z-index: 15; background: rgba(0,0,0,0.3); }
+  .mobile-overlay.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Config screen（第一次使用，尚未設定 API URL 時顯示）-->
+<div id="config-screen" class="config-screen" style="display:none">
+  <h2>⚙️ 設定 API 網址</h2>
+  <p>請貼上你在 Google Apps Script 部署後取得的 Web App 網址。<br/>設定一次後會自動記住，之後不用再設定。</p>
+  <label>Google Apps Script Web App 網址</label>
+  <input id="api-url-input" type="url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec" />
+  <div class="config-hint">網址格式應以 script.google.com 開頭</div>
+  <button class="btn btn-primary" onclick="saveApiUrl()" style="width:100%;justify-content:center">連線並開始使用</button>
+</div>
+
+<!-- 主介面 -->
+<div class="layout" id="main-layout" style="display:none">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="app-name">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="1" y="1" width="7" height="7" rx="2" fill="#2D5016" opacity="0.8"/>
+          <rect x="10" y="1" width="7" height="7" rx="2" fill="#2D5016" opacity="0.4"/>
+          <rect x="1" y="10" width="7" height="7" rx="2" fill="#2D5016" opacity="0.4"/>
+          <rect x="10" y="10" width="7" height="7" rx="2" fill="#2D5016" opacity="0.8"/>
+        </svg>
+        週會任務管理
+      </div>
+      <div class="app-sub">共用版 · 資料即時同步</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">週次記錄</div>
+      <div id="week-nav"></div>
+    </div>
+    <button class="sidebar-add-btn" onclick="showNewWeekModal()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      新增本週
+    </button>
+    <div style="margin-top:auto; padding: 12px 18px 16px; border-top: 1px solid var(--border);">
+      <button onclick="showApiSettings()" style="font-size:11px;color:var(--text-3);background:none;border:none;cursor:pointer;font-family:var(--font);width:100%;text-align:left">
+        ⚙ 修改 API 設定
+      </button>
+    </div>
+  </aside>
+  <div class="mobile-overlay" id="mobile-overlay" onclick="closeSidebar()"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" onclick="openSidebar()">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div>
+          <div class="topbar-title" id="topbar-title">載入中...</div>
+          <div class="topbar-sub" id="topbar-sub"></div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="refresh-btn" onclick="loadFromServer(true)">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M11 6.5A4.5 4.5 0 1 1 6.5 2c1.2 0 2.3.5 3.1 1.3L11 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          重新整理
+        </button>
+        <div class="sync-status">
+          <div class="sync-dot" id="sync-dot"></div>
+          <span id="sync-label">—</span>
+        </div>
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-input" onclick="setView('input')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="1" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="7" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.2"/></svg>
+            填入
+          </button>
+          <button class="view-btn" id="btn-overview" onclick="setView('overview')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 10V3M4.5 10V6M8 10V4M11.5 10V1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            總覽
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="page active" id="page-input">
+      <div id="setup-banner" class="setup-banner hidden">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM8 5v4M8 11h.01" stroke="#7A5210" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <div class="setup-banner-text"><strong>尚未連線到 Google Sheets。</strong> 現在顯示的是本機暫存資料。請先完成 <span class="setup-link" onclick="showApiSettings()">API 設定</span> 才能讓全員同步。</div>
+      </div>
+      <div class="member-grid" id="member-grid"></div>
+    </div>
+
+    <div class="page" id="page-overview">
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="overview-wrap">
+        <table class="overview-table">
+          <thead><tr>
+            <th style="width:130px">成員</th>
+            <th>本週代辦</th>
+            <th style="width:110px">進度</th>
+          </tr></thead>
+          <tbody id="overview-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-host"></div>
+<div id="toast-host"></div>
+
+<script>
+// ══════════════════════════════
+//  設定
+// ══════════════════════════════
+const LS_API  = 'wm-api-url';
+const LS_DATA = 'wm-local-data';
+
+const MEMBERS = [
+  { name:'佳青', bg:'#EEEDFE', fg:'#3C3489' },
+  { name:'佳芬', bg:'#E1F5EE', fg:'#085041' },
+  { name:'馬汀', bg:'#FAECE7', fg:'#712B13' },
+  { name:'馨柔', bg:'#FBEAF0', fg:'#72243E' },
+  { name:'鈺升', bg:'#E6F1FB', fg:'#0C447C' },
+  { name:'月靜', bg:'#EAF3DE', fg:'#27500A' },
+  { name:'戴康', bg:'#FAEEDA', fg:'#633806' },
+  { name:'慈薇', bg:'#FCEBEB', fg:'#791F1F' },
+];
+
+const SEED_TASKS = {
+  '佳青':['優化 Pinkoi 旗艦館','概念店排程','概念店陳列空間搜集'],
+  '佳芬':['臉書發文','酷澎改價二次申請','官網優化拍攝需求','官網優化首頁文字發想','618活動LINE/EDM'],
+  '馬汀':['企業禮贈品','大貨出貨－IBM','簽約中－旭瑞文化傳媒','進行中－聚富建設','平台活動/版位/主題提報、6月版位活動建立','例行會議（每周一）、週會（每周二）'],
+  '馨柔':['常態社群貼文（IG、FB）','官網優化頁面確認','廣告優化','傳藝暑假 Meta','企業建設 Google & Meta','常態日日系列 Google & Meta','厝內系列 Meta'],
+  '鈺升':['官網優化拍攝規劃','攝影棚攝影師時間確認','公益計畫 Google'],
+  '月靜':['貸款1600萬','帳務－人事資料統整中','會計資料－會計阿姨確認中','盤點規劃－6/17開會進行倉庫定位與整理','倉庫庫存－6/10倉庫去～'],
+  '戴康':['通路陳列優化-大稻埕（合藝埕）(6/12前)✅','通路陳列優化-大稻埕（台灣物產）(6/12前)','補助案-配合地方創生推動城鄉特色產業發展計畫報告書','通路POP-花見翻譯優化(6/12前)✅','補助案-IDDI期中審查說明會(6/16)','補助案-IDDI簽約計畫書及契約書(6/17前寄出)','通路陳列優化-傳藝(6/18前)','展覽-2026台北寵物展'],
+  '慈薇':['整理並建檔傳藝門市6/18前需出貨訂單','彙整林百貨、巨城商品銷售統計資料（統計至2024年）','建立傳藝門市自取服務SOP流程','盤點並整理傳藝各體驗課程需翻譯之文字內容','確認誠品各門市補貨需求及補貨安排'],
+};
+
+// ══════════════════════════════
+//  狀態
+// ══════════════════════════════
+let state    = { weeks:[], currentWeek:null, idCounter:1000 };
+let apiUrl   = '';
+let view     = 'input';
+let saveTimer = null;
+let hasApi   = false;
+
+// ══════════════════════════════
+//  初始化
+// ══════════════════════════════
+function init() {
+  apiUrl = localStorage.getItem(LS_API) || '';
+  hasApi = !!apiUrl;
+
+  if (!hasApi) {
+    // 顯示設定畫面
+    document.getElementById('config-screen').style.display = 'block';
+    loadLocalFallback();
+  } else {
+    showMainLayout();
+    loadFromServer(false);
+  }
+}
+
+function showMainLayout() {
+  document.getElementById('config-screen').style.display = 'none';
+  document.getElementById('main-layout').style.display = 'flex';
+  if (!hasApi) {
+    document.getElementById('setup-banner').classList.remove('hidden');
+  } else {
+    document.getElementById('setup-banner').classList.add('hidden');
+  }
+}
+
+function loadLocalFallback() {
+  const raw = localStorage.getItem(LS_DATA);
+  if (raw) {
+    try { state = JSON.parse(raw); } catch(e) {}
+  }
+  if (!state.weeks || !state.weeks.length) seedInitialData();
+  showMainLayout();
+  renderAll();
+  setSyncStatus('offline', '本機模式');
+}
+
+function seedInitialData() {
+  const week = { id:'w-20260609', label:'20260609 週會', tasks:{} };
+  MEMBERS.forEach(m => {
+    week.tasks[m.name] = (SEED_TASKS[m.name]||[]).map(text => ({
+      id: ++state.idCounter,
+      text: text.replace('✅','').trim(),
+      done: text.includes('✅')
+    }));
+  });
+  state.weeks = [week];
+  state.currentWeek = week.id;
+}
+
+// ══════════════════════════════
+//  API 設定
+// ══════════════════════════════
+function saveApiUrl() {
+  const val = (document.getElementById('api-url-input').value || '').trim();
+  if (!val || !val.startsWith('https://script.google.com')) {
+    toast('請輸入正確的 Google Apps Script 網址');
+    return;
+  }
+  localStorage.setItem(LS_API, val);
+  apiUrl = val;
+  hasApi = true;
+  showMainLayout();
+  loadFromServer(false);
+}
+
+function showApiSettings() {
+  document.getElementById('modal-host').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>修改 API 設定</h3>
+        <p>更改 Google Apps Script Web App 網址後，資料會重新從 Google Sheets 載入。</p>
+        <label>Web App 網址</label>
+        <input id="api-edit-input" value="${escHtml(apiUrl)}" placeholder="https://script.google.com/macros/s/..." />
+        <div class="modal-btns">
+          <button class="btn" onclick="closeModal()">取消</button>
+          <button class="btn btn-primary" onclick="applyApiSettings()">儲存並重新連線</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>{ const el=document.getElementById('api-edit-input'); if(el){el.focus();el.select();} },50);
+}
+
+function applyApiSettings() {
+  const val = (document.getElementById('api-edit-input').value||'').trim();
+  if (!val) return;
+  localStorage.setItem(LS_API, val);
+  apiUrl = val;
+  hasApi = true;
+  closeModal();
+  document.getElementById('setup-banner').classList.add('hidden');
+  loadFromServer(true);
+}
+
+// ══════════════════════════════
+//  網路：讀取 / 儲存
+// ══════════════════════════════
+async function loadFromServer(showToast) {
+  if (!hasApi) return;
+  setSyncStatus('syncing', '同步中...');
+  try {
+    const res = await fetch(apiUrl + '?action=getData', { cache:'no-store' });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'API error');
+
+    const { weeks, idCounter } = json.data;
+    if (weeks && weeks.length) {
+      state.weeks = weeks;
+      state.idCounter = Math.max(idCounter||0, state.idCounter);
+      if (!state.currentWeek || !state.weeks.find(w=>w.id===state.currentWeek)) {
+        state.currentWeek = state.weeks[0].id;
+      }
+    } else {
+      seedInitialData();
+      await pushToServer();
+    }
+
+    localStorage.setItem(LS_DATA, JSON.stringify(state));
+    renderAll();
+    setSyncStatus('synced', '已同步');
+    if (showToast) toast('已載入最新資料');
+  } catch(err) {
+    setSyncStatus('error', '連線失敗');
+    loadLocalFallback();
+    if (showToast) toast('無法連線，顯示本機資料');
+  }
+}
+
+async function pushToServer() {
+  if (!hasApi) {
+    localStorage.setItem(LS_DATA, JSON.stringify(state));
+    return;
+  }
+  setSyncStatus('syncing', '儲存中...');
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action:'saveAll', weeks: state.weeks })
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error||'save error');
+    localStorage.setItem(LS_DATA, JSON.stringify(state));
+    setSyncStatus('synced', '已儲存');
+  } catch(err) {
+    setSyncStatus('error', '儲存失敗');
+    localStorage.setItem(LS_DATA, JSON.stringify(state));
+  }
+}
+
+function debounceSave() {
+  setSyncStatus('syncing', '儲存中...');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(pushToServer, 1200);
+}
+
+function setSyncStatus(type, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if (!dot||!lbl) return;
+  dot.className = 'sync-dot ' + (type==='synced'?'synced':type==='syncing'?'syncing':type==='error'?'error':'');
+  lbl.textContent = label;
+}
+
+// ══════════════════════════════
+//  週次操作
+// ══════════════════════════════
+function getWeek() { return state.weeks.find(w=>w.id===state.currentWeek); }
+
+function getWeekPct(week) {
+  let t=0,d=0;
+  MEMBERS.forEach(m=>{ const mt=week.tasks[m.name]||[]; t+=mt.length; d+=mt.filter(x=>x.done).length; });
+  return t ? Math.round(d/t*100) : 0;
+}
+
+function selectWeek(id) {
+  state.currentWeek = id;
+  renderAll();
+  closeSidebar();
+}
+
+function showNewWeekModal() {
+  const today = new Date();
+  const ymd = today.toISOString().slice(0,10).replace(/-/g,'');
+  document.getElementById('modal-host').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>新增週次</h3>
+        <p>建立新一週的任務清單，全員可各自填入代辦事項。</p>
+        <label>週次名稱</label>
+        <input id="modal-inp" value="${ymd} 週會" onkeydown="if(event.key==='Enter')confirmNewWeek()" />
+        <div class="modal-btns">
+          <button class="btn" onclick="closeModal()">取消</button>
+          <button class="btn btn-primary" onclick="confirmNewWeek()">建立</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>{ const el=document.getElementById('modal-inp'); if(el){el.focus();el.select();} },50);
+}
+
+function confirmNewWeek() {
+  const label = (document.getElementById('modal-inp').value||'').trim();
+  if (!label) return;
+  const id = 'w-'+Date.now();
+  const week = { id, label, tasks:{} };
+  MEMBERS.forEach(m=>{ week.tasks[m.name]=[]; });
+  state.weeks.unshift(week);
+  state.currentWeek = id;
+  closeModal();
+  renderAll();
+  debounceSave();
+  toast('已建立「'+label+'」');
+}
+
+// ══════════════════════════════
+//  任務操作
+// ══════════════════════════════
+function addTask(memberName) {
+  const inp = document.getElementById('inp-'+memberName);
+  const text = inp.value.trim();
+  if (!text) return;
+  const w = getWeek(); if (!w) return;
+  if (!w.tasks[memberName]) w.tasks[memberName]=[];
+  w.tasks[memberName].push({ id:++state.idCounter, text, done:false });
+  inp.value='';
+  refreshCard(memberName);
+  debounceSave();
+}
+
+function toggleTask(memberName, id) {
+  const w = getWeek(); if (!w) return;
+  const t=(w.tasks[memberName]||[]).find(t=>t.id===id);
+  if(t) t.done=!t.done;
+  refreshCard(memberName);
+  if(view==='overview') renderOverview();
+  debounceSave();
+}
+
+function deleteTask(memberName, id) {
+  const w = getWeek(); if (!w) return;
+  w.tasks[memberName]=(w.tasks[memberName]||[]).filter(t=>t.id!==id);
+  refreshCard(memberName);
+  debounceSave();
+}
+
+// ══════════════════════════════
+//  Render
+// ══════════════════════════════
+function renderAll() {
+  renderNav();
+  renderTopbar();
+  if(view==='input') renderInputView();
+  else renderOverview();
+}
+
+function renderNav() {
+  document.getElementById('week-nav').innerHTML = state.weeks.map(w=>`
+    <button class="nav-item${w.id===state.currentWeek?' active':''}" onclick="selectWeek('${w.id}')">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 5h5M4 7.5h3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+      <span class="week-name">${w.label}</span>
+      <span class="week-pct">${getWeekPct(w)}%</span>
+    </button>`).join('');
+}
+
+function renderTopbar() {
+  const w=getWeek(); if(!w) return;
+  let t=0,d=0;
+  MEMBERS.forEach(m=>{ const mt=w.tasks[m.name]||[]; t+=mt.length; d+=mt.filter(x=>x.done).length; });
+  const pct=t?Math.round(d/t*100):0;
+  document.getElementById('topbar-title').textContent=w.label;
+  document.getElementById('topbar-sub').textContent=`${d} / ${t} 項完成 · ${pct}%`;
+}
+
+function renderInputView() {
+  const w=getWeek(); if(!w) return;
+  document.getElementById('member-grid').innerHTML = MEMBERS.map(m=>{
+    const mt=w.tasks[m.name]||[];
+    const done=mt.filter(t=>t.done).length;
+    const pct=mt.length?Math.round(done/mt.length*100):0;
+    return `<div class="member-card">
+      <div class="card-head">
+        <div class="avatar" style="background:${m.bg};color:${m.fg}">${m.name[0]}</div>
+        <div class="card-head-info">
+          <div class="card-member-name">${m.name}</div>
+          <div class="card-progress-row">
+            <div class="mini-bar"><div class="mini-bar-fill" id="bar-${m.name}" style="width:${pct}%"></div></div>
+            <span class="mini-pct" id="pct-${m.name}">${done}/${mt.length}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="add-row">
+          <input class="add-input" id="inp-${m.name}" placeholder="新增代辦事項..." onkeydown="if(event.key==='Enter')addTask('${m.name}')" />
+          <button class="add-btn" onclick="addTask('${m.name}')">新增</button>
+        </div>
+        <div class="task-list" id="list-${m.name}">${renderTasks(m.name,w)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTasks(memberName,w) {
+  const mt=(w||getWeek()).tasks[memberName]||[];
+  if(!mt.length) return `<div class="empty-state">輸入上方欄位新增任務</div>`;
+  return mt.map(t=>`<div class="task-item${t.done?' done':''}">
+    <input type="checkbox" class="task-check" ${t.done?'checked':''} onchange="toggleTask('${memberName}',${t.id})" />
+    <span class="task-label">${escHtml(t.text)}</span>
+    <button class="task-del" onclick="deleteTask('${memberName}',${t.id})">✕</button>
+  </div>`).join('');
+}
+
+function refreshCard(memberName) {
+  const w=getWeek(); if(!w) return;
+  const mt=w.tasks[memberName]||[];
+  const done=mt.filter(t=>t.done).length;
+  const pct=mt.length?Math.round(done/mt.length*100):0;
+  const listEl=document.getElementById('list-'+memberName);
+  if(listEl) listEl.innerHTML=renderTasks(memberName,w);
+  const barEl=document.getElementById('bar-'+memberName);
+  if(barEl) barEl.style.width=pct+'%';
+  const pctEl=document.getElementById('pct-'+memberName);
+  if(pctEl) pctEl.textContent=`${done}/${mt.length}`;
+  renderTopbar(); renderNav();
+}
+
+function renderOverview() {
+  const w=getWeek(); if(!w) return;
+  let total=0,done=0;
+  MEMBERS.forEach(m=>{ const mt=w.tasks[m.name]||[]; total+=mt.length; done+=mt.filter(t=>t.done).length; });
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-box"><div class="stat-label">總任務</div><div class="stat-value">${total}</div><div class="stat-sub">本週全員合計</div></div>
+    <div class="stat-box"><div class="stat-label">已完成</div><div class="stat-value" style="color:#2D5016">${done}</div><div class="stat-sub">勾選完成項目</div></div>
+    <div class="stat-box"><div class="stat-label">待處理</div><div class="stat-value" style="color:#7A4F1F">${total-done}</div><div class="stat-sub">尚未完成項目</div></div>
+    <div class="stat-box"><div class="stat-label">完成率</div><div class="stat-value">${pct}%</div><div class="overall-bar"><div class="overall-fill" style="width:${pct}%"></div></div></div>`;
+  document.getElementById('overview-tbody').innerHTML=MEMBERS.map(m=>{
+    const mt=w.tasks[m.name]||[];
+    if(!mt.length) return '';
+    const d=mt.filter(t=>t.done).length;
+    const p=mt.length?Math.round(d/mt.length*100):0;
+    return `<tr>
+      <td><div class="member-cell">
+        <div class="avatar" style="width:28px;height:28px;font-size:12px;background:${m.bg};color:${m.fg}">${m.name[0]}</div>
+        <div><div class="name">${m.name}</div><div class="count">${d}/${mt.length}</div></div>
+      </div></td>
+      <td><div class="task-chips">${mt.map(t=>`<span class="chip${t.done?' done':''}">${escHtml(t.text)}</span>`).join('')}</div></td>
+      <td><div class="row-bar-wrap">
+        <div class="row-bar"><div class="row-bar-fill" style="width:${p}%"></div></div>
+        <span class="row-pct">${p}%</span>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════
+//  UI 工具
+// ══════════════════════════════
+function setView(v) {
+  view=v;
+  document.getElementById('page-input').classList.toggle('active',v==='input');
+  document.getElementById('page-overview').classList.toggle('active',v==='overview');
+  document.getElementById('btn-input').classList.toggle('active',v==='input');
+  document.getElementById('btn-overview').classList.toggle('active',v==='overview');
+  if(v==='overview') renderOverview();
+}
+function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('mobile-overlay').classList.add('show'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('mobile-overlay').classList.remove('show'); }
+function closeModal() { document.getElementById('modal-host').innerHTML=''; }
+function toast(msg) {
+  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
+  document.getElementById('toast-host').appendChild(el);
+  setTimeout(()=>el.remove(),2500);
+}
+function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════════════════════
+//  啟動
+// ══════════════════════════════
+init();
+</script>
+</body>
+</html>
