@@ -491,8 +491,17 @@ function gasGet(params) {
 }
 
 async function gasSave(weeks) {
-  const b64=btoa(unescape(encodeURIComponent(JSON.stringify(weeks))));
-  return gasGet({action:'saveAll',payload:b64});
+  // POST 傳送：不受 URL 長度限制，可承載大量資料
+  const res = await fetch(apiUrl, {
+    method: 'POST',
+    // Google Apps Script 不支援 application/json 的 preflight，
+    // 改用 text/plain 可跳過 CORS preflight（no-cors 模式）
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'saveAll', weeks })
+  });
+  // no-cors 模式下 response 是 opaque，無法讀取內容，視為成功
+  return { ok: true };
 }
 
 async function loadFromServer(showToast) {
@@ -528,8 +537,7 @@ async function pushToServer() {
   if(!hasApi) return;
   setSyncStatus('syncing','儲存中...');
   try {
-    const res=await gasSave(state.weeks);
-    if(!res.ok) throw new Error(res.error);
+    await gasSave(state.weeks);
     setSyncStatus('synced','已儲存');
   } catch(err){
     console.error('pushToServer:',err);
