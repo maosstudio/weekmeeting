@@ -876,6 +876,20 @@ function deleteTask(memberName,id){
   refreshCard(memberName); debounceSave();
 }
 
+function saveTaskText(el, memberName, id){
+  el.style.background='';
+  const w=getWeek(); if(!w) return;
+  const t=(w.tasks[memberName]||[]).find(t=>t.id===id); if(!t) return;
+  const newText=el.innerText.trim();
+  if(!newText){ el.innerText=t.text; return; } // 不允許空白
+  if(newText===t.text) return; // 沒有變化不儲存
+  // 檢查是否為純網址
+  t.text=newText;
+  if(isUrl(newText)) t.url=newText;
+  else if(t.url && t.text!==t.url) {} // 保留原有 url 欄位
+  debounceSave();
+}
+
 // ══════════════════════════════
 //  拖移排序
 // ══════════════════════════════
@@ -989,7 +1003,13 @@ function renderTasks(memberName,w){
         <svg width="10" height="14" viewBox="0 0 10 14" fill="none"><circle cx="3" cy="2.5" r="1.2" fill="currentColor"/><circle cx="7" cy="2.5" r="1.2" fill="currentColor"/><circle cx="3" cy="7" r="1.2" fill="currentColor"/><circle cx="7" cy="7" r="1.2" fill="currentColor"/><circle cx="3" cy="11.5" r="1.2" fill="currentColor"/><circle cx="7" cy="11.5" r="1.2" fill="currentColor"/></svg>
       </span>
       <input type="checkbox" class="task-check" ${t.done?'checked':''} onchange="toggleTask('${memberName}',${t.id})"/>
-      <span class="task-label">${renderTaskLabel(t)}</span>
+      <span class="task-label" contenteditable="true" spellcheck="false"
+        style="outline:none;border-radius:3px;padding:0 2px;transition:background .12s"
+        onfocus="this.style.background='var(--surface)';this._orig=this.innerText"
+        onblur="saveTaskText(this,'${memberName}',${t.id})"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+        onclick="event.stopPropagation()"
+      >${renderTaskLabel(t)}</span>
       <button class="task-del" onclick="deleteTask('${memberName}',${t.id})">✕</button>
     </div>`).join('');
 }
