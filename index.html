@@ -930,7 +930,7 @@ function renderTopbar(){
   document.getElementById('topbar-sub').textContent=`${d} / ${t} 項完成 · ${t?Math.round(d/t*100):0}%`;
 }
 
-function avatarHtml(m, size=18){
+function avatarHtml(m, size=45){
   if(m.avatar){
     return `<img src="${m.avatar}" class="avatar" style="width:${size}px;height:${size}px" alt="${escHtml(m.name)}"/>`;
   }
@@ -946,7 +946,7 @@ function renderInputView(){
     return `<div class="member-card">
       <div class="card-head">
         <div class="avatar-wrap" onclick="showEditMemberModal('${m.name}')" title="編輯成員">
-          ${avatarHtml(m,18)}
+          ${avatarHtml(m,45)}
           <div class="avatar-edit"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         </div>
         <div class="card-head-info" style="flex-direction:column;align-items:flex-start">
@@ -1021,7 +1021,7 @@ function renderOverview(){
     const p=mt.length?Math.round(d/mt.length*100):0;
     return `<tr>
       <td><div class="member-cell">
-        ${avatarHtml(m,14)}
+        ${avatarHtml(m,28)}
         <div><div class="name">${escHtml(m.name)}</div><div class="count">${d}/${mt.length}</div></div>
       </div></td>
       <td><div class="task-chips">${mt.map(t=>`<span class="chip${t.done?' done':''}">${renderChipLabel(t)}</span>`).join('')}</div></td>
