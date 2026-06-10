@@ -71,7 +71,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .setup-link{color:var(--accent);font-weight:500;cursor:pointer;text-decoration:underline}
 
 /* ── member grid ── */
-.member-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.member-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;flex:1;min-width:0}
 .member-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
 .card-head{padding:14px 16px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
 
@@ -121,6 +121,22 @@ img.avatar{object-fit:cover}
 .task-item:hover .task-del{opacity:1}
 .task-del:hover{color:var(--danger);background:var(--danger-bg)}
 .empty-state{font-size:12px;color:var(--text-3);text-align:center;padding:16px 0 8px}
+.content-layout{display:flex;gap:16px;align-items:flex-start}
+.discussion-wrap{flex-shrink:0;width:320px;position:sticky;top:72px}
+.discussion-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.discussion-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.discussion-head-icon{width:28px;height:28px;border-radius:50%;background:var(--accent-bg);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.discussion-head-title{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.discussion-body{padding:14px 16px;min-height:680px;font-size:13px;color:var(--text);line-height:1.8;outline:none;white-space:pre-wrap;word-break:break-word}
+.discussion-body:empty::before{content:attr(data-placeholder);color:var(--text-3);pointer-events:none}
+.discussion-body a{color:var(--accent);text-decoration:underline;text-underline-offset:2px;word-break:break-all}
+.discussion-body a:hover{opacity:.75}
+.discussion-footer{padding:6px 16px 10px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)}
+.discussion-body img{max-width:100%;border-radius:var(--r-sm);margin:4px 0;display:block;cursor:pointer}
+.discussion-body img:hover{opacity:.9}
+.discussion-footer-hint{font-size:11px;color:var(--text-3);flex:1}
+.discussion-link-btn{padding:4px 10px;border-radius:var(--r-sm);border:1px solid var(--border);background:none;color:var(--text-3);font-size:11px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px;transition:all .12s}
+.discussion-link-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
 .task-link{color:var(--accent);text-decoration:underline;text-underline-offset:2px;word-break:break-all;cursor:pointer}
 .task-link:hover{opacity:.75}
 .task-link-icon{display:inline-block;margin-left:3px;opacity:.5;vertical-align:middle;flex-shrink:0}
@@ -199,6 +215,11 @@ img.avatar{object-fit:cover}
 @keyframes toastIn{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
 
 /* mobile */
+@media(max-width:900px){
+  .content-layout{flex-direction:column}
+  .discussion-wrap{width:100%!important;position:static}
+  .member-grid{grid-template-columns:1fr!important}
+}
 @media(max-width:700px){
   .sidebar{transform:translateX(-100%);transition:transform .2s}
   .sidebar.open{transform:none;box-shadow:var(--shadow-md)}
@@ -311,7 +332,38 @@ img.avatar{object-fit:cover}
           新增成員
         </button>
       </div>
-      <div class="member-grid" id="member-grid"></div>
+      <div class="content-layout">
+  <div class="discussion-wrap">
+    <div class="discussion-card">
+      <div class="discussion-head">
+        <div class="discussion-head-icon">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 6.5h7M2 10h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <div class="discussion-head-title">週會討論事項</div>
+        <button class="discussion-link-btn" onclick="showDiscussionLinkModal()" title="插入超連結">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M4.5 6.5a2.5 2.5 0 0 0 3.5 0l1.5-1.5a2.5 2.5 0 0 0-3.5-3.5L5 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M6.5 4.5a2.5 2.5 0 0 0-3.5 0L1.5 6A2.5 2.5 0 0 0 5 9.5L6 8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          插入連結
+        </button>
+        <button class="discussion-link-btn" onclick="triggerDiscussionImage()" title="插入圖片">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="1.5" width="9" height="8" rx="1.2" stroke="currentColor" stroke-width="1.2"/><circle cx="3.5" cy="4" r="1" fill="currentColor"/><path d="M1 8l2.5-2.5 2 2 1.5-1.5L9 8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          插入圖片
+        </button>
+      </div>
+      <div class="discussion-body" id="discussion-body"
+        contenteditable="true" spellcheck="false"
+        data-placeholder="點此輸入本週討論事項、決議、備注…（可貼上或拖曳圖片）"
+        onblur="saveDiscussion()"
+        onpaste="handleDiscussionPaste(event)"
+        ondragover="event.preventDefault()"
+        ondrop="handleDiscussionDrop(event)"
+      ></div>
+      <div class="discussion-footer">
+        <span class="discussion-footer-hint">支援直接貼上網址自動轉換為超連結</span>
+      </div>
+    </div>
+  </div>
+  <div class="member-grid" id="member-grid"></div>
+</div>
     </div>
 
     <div class="page" id="page-overview">
@@ -333,6 +385,7 @@ img.avatar{object-fit:cover}
 <div id="modal-host"></div>
 <div id="toast-host"></div>
 <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)"/>
+<input type="file" id="discussion-img-input" accept="image/*" style="display:none" onchange="handleDiscussionImage(event)"/>
 
 <script>
 // ══════════════════════════════
@@ -501,9 +554,30 @@ function gasGet(params) {
   });
 }
 
+function weeksWithDiscussion(weeks){
+  // encode discussion as a special task row before sending to server
+  return weeks.map(w=>{
+    const copy=JSON.parse(JSON.stringify(w));
+    if(w.discussion!==undefined){
+      if(!copy.tasks['__discussion__']) copy.tasks['__discussion__']=[];
+      copy.tasks['__discussion__']=[{id:'disc-'+w.id, text:'__DISCUSSION__', html:w.discussion, done:false}];
+    }
+    return copy;
+  });
+}
+
+function weeksDecodeDiscussion(weeks){
+  return weeks.map(w=>{
+    const disc=(w.tasks&&w.tasks['__discussion__'])||[];
+    if(disc.length) w.discussion=disc[0].html||'';
+    delete w.tasks['__discussion__'];
+    return w;
+  });
+}
+
 async function gasSave(weeks) {
   // 分批 JSONP GET：每批約 1200 字元，完全繞過 CORS 與 POST 問題
-  const json = JSON.stringify(weeks);
+  const json = JSON.stringify(weeksWithDiscussion(weeks));
   const CHUNK = 1200;
   const total = Math.ceil(json.length / CHUNK);
   const batchId = 'b' + Date.now();
@@ -534,7 +608,7 @@ async function loadFromServer(showToast) {
     if(!res.ok) throw new Error(res.error||'API error');
     const {weeks,idCounter}=res.data;
     if(weeks&&weeks.length){
-      state.weeks=weeks;
+      state.weeks=weeksDecodeDiscussion(weeks);
       state.idCounter=Math.max(idCounter||0,state.idCounter);
       if(!state.currentWeek||!state.weeks.find(w=>w.id===state.currentWeek))
         state.currentWeek=state.weeks[0].id;
@@ -920,7 +994,7 @@ function onDrop(e,memberName,idx){
 // ══════════════════════════════
 //  Render
 // ══════════════════════════════
-function renderAll(){ renderNav(); renderTopbar(); if(view==='input') renderInputView(); else renderOverview(); }
+function renderAll(){ renderNav(); renderTopbar(); if(view==='input'){ renderInputView(); setTimeout(loadDiscussion,0); } else renderOverview(); }
 
 function renderNav(){
   document.getElementById('week-nav').innerHTML=state.weeks.map(w=>`
