@@ -36,6 +36,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .nav-item.active{background:var(--accent-bg);color:var(--accent-text);font-weight:500}
 .week-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .week-pct{font-size:10px;font-weight:600;color:var(--text-3);flex-shrink:0}
+.week-del-btn{background:none;border:none;color:var(--text-3);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;border-radius:3px;opacity:0;transition:opacity .1s,color .1s;flex-shrink:0}
+.nav-item:hover .week-del-btn{opacity:1}
+.week-del-btn:hover{color:var(--danger)}
 .nav-item.active .week-pct{color:var(--accent-text)}
 .sidebar-add-btn{margin:8px 10px 0;padding:7px 12px;border-radius:var(--r-sm);border:1px dashed var(--border-strong);background:none;color:var(--text-3);font-size:12px;cursor:pointer;width:calc(100% - 20px);display:flex;align-items:center;gap:6px;transition:all .12s;font-family:var(--font)}
 .sidebar-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
@@ -920,6 +923,36 @@ function showNewWeekModal(){
   setTimeout(()=>{ const el=document.getElementById('modal-inp'); if(el){el.focus();el.select();} },50);
 }
 
+function confirmDeleteWeek(weekId, weekLabel){
+  if(state.weeks.length <= 1){
+    toast('至少保留一個週次，無法刪除');
+    return;
+  }
+  document.getElementById('modal-host').innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>刪除週次</h3>
+        <p>確定要刪除「${escHtml(weekLabel)}」嗎？<br/>該週次的所有任務和討論內容都會一起刪除，且<strong>無法復原</strong>。</p>
+        <div class="modal-btns">
+          <button class="btn" onclick="closeModal()">取消</button>
+          <button class="btn btn-danger" onclick="doDeleteWeek('${weekId}')">確定刪除</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function doDeleteWeek(weekId){
+  state.weeks = state.weeks.filter(w => w.id !== weekId);
+  // 若刪的是目前選中的週次，切換到第一個
+  if(state.currentWeek === weekId){
+    state.currentWeek = state.weeks.length ? state.weeks[0].id : null;
+  }
+  closeModal();
+  renderAll();
+  debounceSave();
+  toast('週次已刪除');
+}
+
 function confirmNewWeek(){
   const label=(document.getElementById('modal-inp').value||'').trim();
   if(!label) return;
@@ -1081,6 +1114,7 @@ function renderNav(){
         onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
       >${escHtml(w.label)}</span>
       <span class="week-pct">${getWeekPct(w)}%</span>
+      <button class="week-del-btn" title="刪除此週次" onclick="event.stopPropagation();confirmDeleteWeek('${w.id}','${escHtml(w.label)}')">&times;</button>
     </div>`).join('');
 }
 
@@ -1093,6 +1127,7 @@ function renderTopbar(){
 }
 
 function avatarHtml(m, size=45){
+  if(!m || !m.name) return `<div class="avatar" style="width:${size}px;height:${size}px;background:#eee;color:#999">${size>20?'?':''}</div>`;
   if(m.avatar){
     return `<img src="${m.avatar}" class="avatar" style="width:${size}px;height:${size}px" alt="${escHtml(m.name)}"/>`;
   }
@@ -1101,7 +1136,7 @@ function avatarHtml(m, size=45){
 
 function renderInputView(){
   const w=getWeek(); if(!w) return;
-  document.getElementById('member-grid').innerHTML=members.map(m=>{
+  document.getElementById('member-grid').innerHTML=members.filter(m=>m&&m.name).map(m=>{
     const mt=w.tasks[m.name]||[];
     const done=mt.filter(t=>t.done).length;
     const pct=mt.length?Math.round(done/mt.length*100):0;
@@ -1176,14 +1211,14 @@ function refreshCard(memberName){
 function renderOverview(){
   const w=getWeek(); if(!w) return;
   let total=0,done=0;
-  members.forEach(m=>{ const mt=w.tasks[m.name]||[]; total+=mt.length; done+=mt.filter(t=>t.done).length; });
+  members.filter(m=>m&&m.name).forEach(m=>{ const mt=w.tasks[m.name]||[]; total+=mt.length; done+=mt.filter(t=>t.done).length; });
   const pct=total?Math.round(done/total*100):0;
   document.getElementById('stats-grid').innerHTML=`
     <div class="stat-box"><div class="stat-label">總任務</div><div class="stat-value">${total}</div><div class="stat-sub">本週全員合計</div></div>
     <div class="stat-box"><div class="stat-label">已完成</div><div class="stat-value" style="color:#2D5016">${done}</div><div class="stat-sub">勾選完成項目</div></div>
     <div class="stat-box"><div class="stat-label">待處理</div><div class="stat-value" style="color:#7A4F1F">${total-done}</div><div class="stat-sub">尚未完成項目</div></div>
     <div class="stat-box"><div class="stat-label">完成率</div><div class="stat-value">${pct}%</div><div class="overall-bar"><div class="overall-fill" style="width:${pct}%"></div></div></div>`;
-  document.getElementById('overview-tbody').innerHTML=members.map(m=>{
+  document.getElementById('overview-tbody').innerHTML=members.filter(m=>m&&m.name).map(m=>{
     const mt=w.tasks[m.name]||[]; if(!mt.length) return '';
     const d=mt.filter(t=>t.done).length;
     const p=mt.length?Math.round(d/mt.length*100):0;
@@ -1512,6 +1547,7 @@ function encodeMembersToState(){
 function decodeMembersFromState(){
   if(!state.membersMeta||!state.membersMeta.length) return;
   state.membersMeta.forEach(sm=>{
+    if(!sm || !sm.name) return; // 跳過無效成員資料
     const local=members.find(m=>m.name===sm.name);
     if(local){
       if(sm.avatar) local.avatar=sm.avatar;
@@ -1519,7 +1555,7 @@ function decodeMembersFromState(){
       local.fg=sm.fg||local.fg;
     } else {
       // 新成員：加入 members list
-      members.push({name:sm.name,bg:sm.bg,fg:sm.fg,avatar:sm.avatar||null});
+      members.push({name:sm.name,bg:sm.bg||'#F0EEE9',fg:sm.fg||'#444',avatar:sm.avatar||null});
     }
   });
   saveMembersMeta();
