@@ -1403,25 +1403,51 @@ function handleDiscussionImage(e){
   uploadAndInsertImage(file);
 }
 
-// ── 圖床設定：請在下方填入你的 imgbb API Key ──
-// 申請方式：https://imgbb.com → 登入 → About → API → 取得免費 API Key
-// 填入後圖片就能跨裝置同步
-const IMGBB_API_KEY = ''; // ← 在這裡填入你的 imgbb API Key
+const IMGBB_API_KEY = 'a62e288ea56c038160ec99772af6608f';
 
 async function uploadImageToCloud(file){
+  const b64 = await fileToBase64(file);
+  const b64data = b64.split(',')[1];
+
+  // 方法一：imgbb（需 API Key）
   try {
-    const b64 = await fileToBase64(file);
-    if(!IMGBB_API_KEY) throw new Error('No API key');
     const form = new FormData();
     form.append('key', IMGBB_API_KEY);
-    form.append('image', b64.split(',')[1]);
+    form.append('image', b64data);
     const res = await fetch('https://api.imgbb.com/1/upload', { method:'POST', body:form });
     const json = await res.json();
     if(json.data && json.data.url) return json.data.url;
-    throw new Error('imgbb failed');
-  } catch(e) {
-    return null; // 回傳 null，呼叫端會 fallback 用 base64（只有自己看得到）
-  }
+    throw new Error('imgbb no url');
+  } catch(e){ console.warn('imgbb failed:', e.message); }
+
+  // 方法二：upload.io 免費公開方案
+  try {
+    const res2 = await fetch('https://api.upload.io/v2/accounts/FW25ayQ/uploads/binary', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer public_FW25ayQHHr7jhKrMKhrzXmBMWxz2',
+        'Content-Type': file.type || 'image/jpeg'
+      },
+      body: file
+    });
+    const json2 = await res2.json();
+    if(json2.fileUrl) return json2.fileUrl;
+    throw new Error('upload.io no url');
+  } catch(e){ console.warn('upload.io failed:', e.message); }
+
+  // 方法三：catbox.moe 匿名圖床
+  try {
+    const form3 = new FormData();
+    form3.append('reqtype', 'fileupload');
+    form3.append('userhash', '');
+    form3.append('fileToUpload', file);
+    const res3 = await fetch('https://catbox.moe/user/api.php', { method:'POST', body:form3 });
+    const url = await res3.text();
+    if(url && url.startsWith('https://')) return url.trim();
+    throw new Error('catbox no url');
+  } catch(e){ console.warn('catbox failed:', e.message); }
+
+  return null; // 全部失敗
 }
 
 async function uploadAndInsertImage(file){
