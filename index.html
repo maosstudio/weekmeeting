@@ -132,7 +132,11 @@ img.avatar{object-fit:cover}
 .discussion-body a{color:var(--accent);text-decoration:underline;text-underline-offset:2px;word-break:break-all}
 .discussion-body a:hover{opacity:.75}
 .discussion-footer{padding:6px 16px 10px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border)}
-.discussion-body img{max-width:100%;border-radius:var(--r-sm);margin:4px 0;display:block;cursor:pointer}
+.discussion-body img{max-width:100%;border-radius:var(--r-sm);margin:4px 0;display:block;cursor:zoom-in}
+.disc-img-wrap{position:relative;display:inline-block;max-width:100%;margin:4px 0}
+.disc-img-remove{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;padding:0}
+.disc-img-wrap:hover .disc-img-remove{opacity:1}
+.disc-img-remove:hover{background:rgba(180,0,0,.8)}
 .discussion-body img:hover{opacity:.9}
 .discussion-footer-hint{font-size:11px;color:var(--text-3);flex:1}
 .discussion-link-btn{padding:4px 10px;border-radius:var(--r-sm);border:1px solid var(--border);background:none;color:var(--text-3);font-size:11px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px;transition:all .12s}
@@ -604,26 +608,25 @@ function weeksDecodeDiscussion(weeks){
 }
 
 async function gasSave(weeks) {
-  // 分批 JSONP GET：每批約 1200 字元，完全繞過 CORS 與 POST 問題
+  // 分批 JSONP GET：每批 800 字元（保守值，避免 URL 過長）
   const json = JSON.stringify(weeksWithDiscussion(weeksWithMeta(weeks)));
-  const CHUNK = 1200;
+  const CHUNK = 800;
   const total = Math.ceil(json.length / CHUNK);
   const batchId = 'b' + Date.now();
 
   for (let i = 0; i < total; i++) {
     const chunk = json.slice(i * CHUNK, (i + 1) * CHUNK);
-    const encoded = encodeURIComponent(chunk);
+    // 不在這裡 encodeURIComponent，gasGet 內部的 qs 組裝會處理
     const res = await gasGet({
       action: 'saveChunk',
-      batchId,
-      index: i,
-      total,
-      chunk: encoded
+      batchId: batchId,
+      chunkIndex: i,
+      chunkTotal: total,
+      chunkData: chunk
     });
     if (!res.ok) throw new Error(res.error || 'saveChunk failed at ' + i);
   }
-  // 通知後端組裝並寫入
-  const res = await gasGet({ action: 'commitChunks', batchId, total });
+  const res = await gasGet({ action: 'commitChunks', batchId: batchId, total: total });
   if (!res.ok) throw new Error(res.error || 'commitChunks failed');
   return { ok: true };
 }
@@ -1255,9 +1258,40 @@ function loadDiscussion(){
   const el=document.getElementById('discussion-body'); if(!el) return;
   const w=getWeek(); if(!w) return;
   el.innerHTML=w.discussion||'';
+  wrapDiscussionImages(el);
+}
+
+function wrapDiscussionImages(el){
   el.querySelectorAll('img').forEach(img=>{
+    if(img.parentNode && img.parentNode.classList && img.parentNode.classList.contains('disc-img-wrap')) return;
     img.style.cursor='zoom-in';
-    img.onclick=()=>openLightbox(img.src);
+    img.style.maxWidth='100%';
+    img.style.borderRadius='6px';
+    img.style.margin='6px 0';
+    img.style.display='block';
+    // wrap
+    const wrap=document.createElement('span');
+    wrap.className='disc-img-wrap';
+    wrap.contentEditable='false';
+    wrap.style.cssText='position:relative;display:inline-block;max-width:100%;';
+    img.parentNode.insertBefore(wrap,img);
+    wrap.appendChild(img);
+    // remove button
+    const btn=document.createElement('button');
+    btn.className='disc-img-remove';
+    btn.title='移除圖片';
+    btn.innerHTML='&times;';
+    btn.onclick=(e)=>{
+      e.stopPropagation();
+      wrap.remove();
+      saveDiscussion();
+    };
+    wrap.appendChild(btn);
+    // zoom on click
+    img.onclick=(e)=>{
+      e.stopPropagation();
+      openLightbox(img.src);
+    };
   });
 }
 
@@ -1359,6 +1393,7 @@ async function uploadAndInsertImage(file){
       ph.replaceWith(img);
       img.after(document.createElement('br'));
     }
+    wrapDiscussionImages(el);
     saveDiscussion();
     toast('✅ 圖片上傳成功，所有人都看得到');
   } catch(err){
@@ -1375,6 +1410,7 @@ async function uploadAndInsertImage(file){
         ph.replaceWith(img);
         img.after(document.createElement('br'));
       }
+      wrapDiscussionImages(el);
       saveDiscussion();
       toast('⚠️ 圖床上傳失敗，圖片已嵌入本機（他人無法看到）');
     } catch(e2){ console.error(e2); }
