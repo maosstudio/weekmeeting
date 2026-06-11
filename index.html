@@ -613,7 +613,7 @@ async function gasSave(weeks) {
     weeks: weeksWithDiscussion(weeksWithMeta(weeks))
   });
 
-  // 先嘗試 POST（no-cors）
+  // 先嘗試 POST（no-cors）— 送出後不驗證，避免巢狀 gasGet 造成 timeout
   try {
     await fetch(apiUrl, {
       method: 'POST',
@@ -621,13 +621,9 @@ async function gasSave(weeks) {
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: payload
     });
-    // no-cors 無法判斷是否成功，等 800ms 後用 GET 驗證
-    await new Promise(r => setTimeout(r, 800));
-    const verify = await gasGet({ action: 'getData' });
-    if (verify && verify.ok) return { ok: true };
-    throw new Error('verify failed');
+    return { ok: true };
   } catch(e) {
-    // POST 失敗或驗證失敗 → 改用分批 JSONP GET
+    // fetch 本身拋出例外（非 no-cors opaque）才走分批 GET 備援
     return await gasSaveChunked(payload);
   }
 }
@@ -690,10 +686,8 @@ async function pushToServer() {
     setSyncStatus('synced','已儲存');
   } catch(err){
     console.error('pushToServer:',err);
-    // 儲存失敗不改變連線狀態，只提示
     setSyncStatus('synced','已暫存（同步中）');
-    // 5 秒後重試一次
-    setTimeout(()=>{ if(hasApi) pushToServer(); }, 5000);
+    setTimeout(()=>{ if(hasApi) pushToServer(); }, 6000);
   }
 }
 
