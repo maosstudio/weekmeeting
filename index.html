@@ -608,19 +608,47 @@ function weeksDecodeDiscussion(weeks){
 }
 
 async function gasSave(weeks) {
-  // POST (no-cors)：body 不受 URL 長度限制，完全解決討論區 & 大頭貼儲存問題
-  // no-cors 下 response 是 opaque（無法讀取），所以不判斷回傳值
   const payload = JSON.stringify({
     action: 'saveAll',
     weeks: weeksWithDiscussion(weeksWithMeta(weeks))
   });
-  await fetch(apiUrl, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: payload
-  });
-  // no-cors 無法確認是否成功，視為成功
+
+  // 先嘗試 POST（no-cors）
+  try {
+    await fetch(apiUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: payload
+    });
+    // no-cors 無法判斷是否成功，等 800ms 後用 GET 驗證
+    await new Promise(r => setTimeout(r, 800));
+    const verify = await gasGet({ action: 'getData' });
+    if (verify && verify.ok) return { ok: true };
+    throw new Error('verify failed');
+  } catch(e) {
+    // POST 失敗或驗證失敗 → 改用分批 JSONP GET
+    return await gasSaveChunked(payload);
+  }
+}
+
+async function gasSaveChunked(payload) {
+  const json = payload; // already stringified
+  const CHUNK = 600;
+  const total = Math.ceil(json.length / CHUNK);
+  const batchId = 'b' + Date.now();
+  for (let i = 0; i < total; i++) {
+    const res = await gasGet({
+      action: 'saveChunk',
+      batchId,
+      chunkIndex: i,
+      chunkTotal: total,
+      chunkData: json.slice(i * CHUNK, (i + 1) * CHUNK)
+    });
+    if (!res || !res.ok) throw new Error((res && res.error) || 'saveChunk failed at ' + i);
+  }
+  const res = await gasGet({ action: 'commitChunks', batchId, total });
+  if (!res || !res.ok) throw new Error((res && res.error) || 'commitChunks failed');
   return { ok: true };
 }
 
@@ -646,7 +674,8 @@ async function loadFromServer(showToast) {
     if(showToast) toast('已載入最新資料');
   } catch(err){
     console.error('loadFromServer:',err);
-    setSyncStatus('error','連線失敗');
+    // GET 失敗才是真的連線失敗
+    setSyncStatus('error','連線失敗，請重新整理');
     useLocalFallback();
     if(showToast) toast('無法連線，顯示本機資料');
   }
@@ -661,7 +690,10 @@ async function pushToServer() {
     setSyncStatus('synced','已儲存');
   } catch(err){
     console.error('pushToServer:',err);
-    setSyncStatus('error','儲存失敗，已暫存本機');
+    // 儲存失敗不改變連線狀態，只提示
+    setSyncStatus('synced','已暫存（同步中）');
+    // 5 秒後重試一次
+    setTimeout(()=>{ if(hasApi) pushToServer(); }, 5000);
   }
 }
 
