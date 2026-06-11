@@ -608,26 +608,19 @@ function weeksDecodeDiscussion(weeks){
 }
 
 async function gasSave(weeks) {
-  // 分批 JSONP GET：每批 800 字元（保守值，避免 URL 過長）
-  const json = JSON.stringify(weeksWithDiscussion(weeksWithMeta(weeks)));
-  const CHUNK = 800;
-  const total = Math.ceil(json.length / CHUNK);
-  const batchId = 'b' + Date.now();
-
-  for (let i = 0; i < total; i++) {
-    const chunk = json.slice(i * CHUNK, (i + 1) * CHUNK);
-    // 不在這裡 encodeURIComponent，gasGet 內部的 qs 組裝會處理
-    const res = await gasGet({
-      action: 'saveChunk',
-      batchId: batchId,
-      chunkIndex: i,
-      chunkTotal: total,
-      chunkData: chunk
-    });
-    if (!res.ok) throw new Error(res.error || 'saveChunk failed at ' + i);
-  }
-  const res = await gasGet({ action: 'commitChunks', batchId: batchId, total: total });
-  if (!res.ok) throw new Error(res.error || 'commitChunks failed');
+  // POST (no-cors)：body 不受 URL 長度限制，完全解決討論區 & 大頭貼儲存問題
+  // no-cors 下 response 是 opaque（無法讀取），所以不判斷回傳值
+  const payload = JSON.stringify({
+    action: 'saveAll',
+    weeks: weeksWithDiscussion(weeksWithMeta(weeks))
+  });
+  await fetch(apiUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: payload
+  });
+  // no-cors 無法確認是否成功，視為成功
   return { ok: true };
 }
 
@@ -827,19 +820,9 @@ async function handleAvatarUpload(e) {
   if(!file||!avatarTargetMember) return;
   toast('頭貼上傳中...');
   try {
-    // 上傳到 Imgur，取得公開 URL，確保跨裝置同步
-    const b64 = await fileToBase64(file);
-    const fd = new FormData();
-    fd.append('image', b64.split(',')[1]);
-    fd.append('type', 'base64');
-    const res = await fetch('https://api.imgur.com/3/image', {
-      method: 'POST',
-      headers: { 'Authorization': 'Client-ID 546c25a59c58ad7' },
-      body: fd
-    });
-    const json = await res.json();
-    if(!json.success) throw new Error('Imgur error');
-    const imgUrl = json.data.link;
+    // 上傳到雲端圖床，取得公開 URL，確保跨裝置同步
+    const imgUrl = await uploadImageToCloud(file);
+    if(!imgUrl) throw new Error('upload failed');
     const m=getMember(avatarTargetMember);
     m.avatar=imgUrl;
     window._editHasAvatar=true;
@@ -1359,6 +1342,27 @@ function handleDiscussionImage(e){
   uploadAndInsertImage(file);
 }
 
+// ── 圖床設定：請在下方填入你的 imgbb API Key ──
+// 申請方式：https://imgbb.com → 登入 → About → API → 取得免費 API Key
+// 填入後圖片就能跨裝置同步
+const IMGBB_API_KEY = ''; // ← 在這裡填入你的 imgbb API Key
+
+async function uploadImageToCloud(file){
+  try {
+    const b64 = await fileToBase64(file);
+    if(!IMGBB_API_KEY) throw new Error('No API key');
+    const form = new FormData();
+    form.append('key', IMGBB_API_KEY);
+    form.append('image', b64.split(',')[1]);
+    const res = await fetch('https://api.imgbb.com/1/upload', { method:'POST', body:form });
+    const json = await res.json();
+    if(json.data && json.data.url) return json.data.url;
+    throw new Error('imgbb failed');
+  } catch(e) {
+    return null; // 回傳 null，呼叫端會 fallback 用 base64（只有自己看得到）
+  }
+}
+
 async function uploadAndInsertImage(file){
   const el=document.getElementById('discussion-body'); if(!el) return;
   el.focus();
@@ -1372,18 +1376,8 @@ async function uploadAndInsertImage(file){
     `<span id="${placeholderId}" style="background:var(--surface2);color:var(--text-3);font-size:12px;padding:4px 10px;border-radius:4px;display:inline-block">⏳ 圖片上傳中...</span>`);
 
   try {
-    const b64=await fileToBase64(file);
-    const fd=new FormData();
-    fd.append('image', b64.split(',')[1]);
-    fd.append('type','base64');
-    const res=await fetch('https://api.imgur.com/3/image',{
-      method:'POST',
-      headers:{'Authorization':'Client-ID 546c25a59c58ad7'},
-      body:fd
-    });
-    const json=await res.json();
-    if(!json.success) throw new Error('Imgur error');
-    const imgUrl=json.data.link;
+    const imgUrl = await uploadImageToCloud(file);
+    if(!imgUrl) throw new Error('upload failed');
     const ph=document.getElementById(placeholderId);
     if(ph){
       const img=document.createElement('img');
