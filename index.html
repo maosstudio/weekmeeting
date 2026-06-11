@@ -361,6 +361,7 @@ img.avatar{object-fit:cover}
         onpaste="handleDiscussionPaste(event)"
         ondragover="event.preventDefault()"
         ondrop="handleDiscussionDrop(event)"
+        onclick="handleDiscussionClick(event)"
       ></div>
       <div class="discussion-footer">
         <span class="discussion-footer-hint">支援直接貼上網址自動轉換為超連結</span>
@@ -818,22 +819,56 @@ function triggerAvatarUpload(memberName) {
   document.getElementById('avatar-file-input').click();
 }
 
-function handleAvatarUpload(e) {
+async function handleAvatarUpload(e) {
   const file=e.target.files[0];
   if(!file||!avatarTargetMember) return;
-  const reader=new FileReader();
-  reader.onload=(ev)=>{
+  toast('頭貼上傳中...');
+  try {
+    // 上傳到 Imgur，取得公開 URL，確保跨裝置同步
+    const b64 = await fileToBase64(file);
+    const fd = new FormData();
+    fd.append('image', b64.split(',')[1]);
+    fd.append('type', 'base64');
+    const res = await fetch('https://api.imgur.com/3/image', {
+      method: 'POST',
+      headers: { 'Authorization': 'Client-ID 546c25a59c58ad7' },
+      body: fd
+    });
+    const json = await res.json();
+    if(!json.success) throw new Error('Imgur error');
+    const imgUrl = json.data.link;
     const m=getMember(avatarTargetMember);
-    m.avatar=ev.target.result;
+    m.avatar=imgUrl;
     window._editHasAvatar=true;
     saveMembersMeta();
     // 更新 modal 預覽
     const prev=document.getElementById('edit-avatar-preview');
-    if(prev){ prev.src=ev.target.result; prev.tagName==='DIV'&&(prev.outerHTML=`<img id="edit-avatar-preview" src="${ev.target.result}" class="avatar-preview" style="width:56px;height:56px"/>`); }
+    if(prev){
+      if(prev.tagName==='IMG'){ prev.src=imgUrl; }
+      else { prev.outerHTML=`<img id="edit-avatar-preview" src="${imgUrl}" class="avatar-preview" style="width:56px;height:56px"/>`; }
+    }
     renderAll();
-    toast('頭貼已更新');
-  };
-  reader.readAsDataURL(file);
+    debounceSave(); // 同步到雲端
+    toast('✅ 頭貼已更新，所有人都看得到');
+  } catch(err) {
+    console.error('Avatar upload failed:', err);
+    // fallback: base64 本機存
+    const reader=new FileReader();
+    reader.onload=(ev)=>{
+      const m=getMember(avatarTargetMember);
+      m.avatar=ev.target.result;
+      window._editHasAvatar=true;
+      saveMembersMeta();
+      const prev=document.getElementById('edit-avatar-preview');
+      if(prev){
+        if(prev.tagName==='IMG'){ prev.src=ev.target.result; }
+        else { prev.outerHTML=`<img id="edit-avatar-preview" src="${ev.target.result}" class="avatar-preview" style="width:56px;height:56px"/>`; }
+      }
+      renderAll();
+      toast('⚠️ 圖床失敗，頭貼已暫存本機（他人無法看到）');
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 function removeAvatar(memberName) {
@@ -1353,6 +1388,15 @@ function fileToBase64(file){
     r.onerror=rej;
     r.readAsDataURL(file);
   });
+}
+
+function handleDiscussionClick(e){
+  // 在 contenteditable 中讓超連結可以正常點擊開啟
+  const a = e.target.closest('a');
+  if(a && a.href){
+    e.preventDefault();
+    window.open(a.href, '_blank', 'noopener');
+  }
 }
 
 function openLightbox(src){
