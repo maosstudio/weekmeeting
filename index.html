@@ -318,7 +318,11 @@ img.avatar{object-fit:cover}
 .cal-cell{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);min-height:88px;padding:6px;display:flex;flex-direction:column;gap:3px}
 .cal-cell.empty{background:none;border:none}
 .cal-cell.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
-.cal-cell.holiday{background:var(--surface2)}
+.cal-cell.holiday{background:#FEF3EC}
+.cal-cell.weekend{background:#F5F5F3}
+.cal-cell.adjwork{background:#EAF2DE}
+.cal-holiday-name{font-size:9px;color:#B85C00;margin-left:3px;font-weight:500;vertical-align:middle}
+.cal-adj-label{font-size:9px;color:var(--accent);margin-left:3px;font-weight:500}
 .cal-date{font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:2px}
 .cal-cell.weekend .cal-date{color:var(--text-3)}
 .cal-leave-chip{font-size:10px;padding:2px 5px;border-radius:4px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1856,33 +1860,46 @@ function decodeMembersFromState(){
 
 // 台灣國定假日（YYYY-MM-DD），政府公告之行政機關辦公日曆
 // 含補假與調整上班日（負數：該日改為上班）
-const TW_HOLIDAYS = new Set([
+// 台灣國定假日 Map：日期 -> 假日名稱
+const TW_HOLIDAYS = new Map([
   // 2025
-  "2025-01-01","2025-01-27","2025-01-28","2025-01-29","2025-01-30","2025-01-31",
-  "2025-02-03","2025-02-04",
-  "2025-02-28","2025-03-31","2025-04-03","2025-04-04",
-  "2025-05-01",
-  "2025-05-30","2025-05-31",
-  "2025-06-28","2025-06-29","2025-06-30",
-  "2025-09-28","2025-10-01","2025-10-02","2025-10-03","2025-10-04","2025-10-05","2025-10-06",
-  "2025-10-09","2025-10-10",
-  "2025-12-25",
+  ["2025-01-01","元旦"],
+  ["2025-01-27","春節"],["2025-01-28","春節"],["2025-01-29","春節"],
+  ["2025-01-30","春節"],["2025-01-31","春節"],
+  ["2025-02-03","補假"],["2025-02-04","補假"],
+  ["2025-02-28","和平紀念日"],
+  ["2025-03-31","補假"],
+  ["2025-04-03","兒童節"],["2025-04-04","清明節"],
+  ["2025-05-01","勞動節"],
+  ["2025-05-30","端午節"],["2025-05-31","補假"],
+  ["2025-06-28","補假"],["2025-06-29","補假"],["2025-06-30","補假"],
+  ["2025-09-28","補假"],
+  ["2025-10-01","補假"],["2025-10-02","補假"],["2025-10-03","中秋節"],
+  ["2025-10-04","補假"],["2025-10-05","補假"],["2025-10-06","補假"],
+  ["2025-10-09","補假"],["2025-10-10","國慶日"],
+  ["2025-12-25","行憲紀念日"],
   // 2026
-  "2026-01-01","2026-01-26","2026-01-27","2026-01-28","2026-01-29","2026-01-30",
-  "2026-02-02","2026-02-03","2026-02-04",
-  "2026-02-28",
-  "2026-04-02","2026-04-03","2026-04-04",
-  "2026-05-01",
-  "2026-06-19","2026-06-20",
-  "2026-09-19","2026-09-21","2026-09-22","2026-09-23",
-  "2026-10-09","2026-10-10",
+  ["2026-01-01","元旦"],
+  ["2026-01-26","補假"],["2026-01-27","春節"],["2026-01-28","春節"],
+  ["2026-01-29","春節"],["2026-01-30","春節"],
+  ["2026-02-02","補假"],["2026-02-03","補假"],["2026-02-04","補假"],
+  ["2026-02-28","和平紀念日"],
+  ["2026-04-02","補假"],["2026-04-03","兒童節"],["2026-04-04","清明節"],
+  ["2026-05-01","勞動節"],
+  ["2026-06-19","端午節"],["2026-06-20","補假"],
+  ["2026-09-19","補假"],["2026-09-21","補假"],
+  ["2026-09-22","中秋節"],["2026-09-23","補假"],
+  ["2026-10-09","補假"],["2026-10-10","國慶日"],
   // 2027
-  "2027-01-01","2027-02-15","2027-02-16","2027-02-17","2027-02-18","2027-02-19","2027-02-20",
-  "2027-02-22","2027-02-28",
-  "2027-04-02","2027-04-05",
-  "2027-05-01",
-  "2027-06-08","2027-06-09",
-  "2027-09-11","2027-10-09","2027-10-10"
+  ["2027-01-01","元旦"],
+  ["2027-02-15","春節"],["2027-02-16","春節"],["2027-02-17","春節"],
+  ["2027-02-18","春節"],["2027-02-19","春節"],["2027-02-20","春節"],
+  ["2027-02-22","補假"],["2027-02-28","和平紀念日"],
+  ["2027-04-02","補假"],["2027-04-05","清明節"],
+  ["2027-05-01","勞動節"],
+  ["2027-06-08","端午節"],["2027-06-09","補假"],
+  ["2027-09-11","中秋節"],
+  ["2027-10-09","補假"],["2027-10-10","國慶日"],
 ]);
 
 // 調整上班日（原為六日但需上班）
@@ -2265,6 +2282,7 @@ function changeCalMonth(delta){
   if(calMonth<0){ calMonth=11; calYear--; }
   if(calMonth>11){ calMonth=0; calYear++; }
   renderCalendar();
+  renderAttenLists();
 }
 
 function renderCalendar(){
@@ -2296,13 +2314,22 @@ function renderCalendar(){
     const more=dayLeaves.length>3?`<div class="cal-more">+${dayLeaves.length-3} 筆</div>`:'';
 
     const isHoliday = TW_HOLIDAYS.has(dateStr);
+    const holidayName = TW_HOLIDAYS.get(dateStr)||'';
     const isAdjWork = TW_WORKDAYS.has(dateStr);
-    const dayLeaveOff=attens.filter(a=>a.type==='dayoff'&&a.member&&a.startDate<=dateStr&&a.endDate>=dateStr);
-    const dayBiztrip=attens.filter(a=>a.type==='biztrip'&&a.member&&a.startDate<=dateStr&&a.endDate>=dateStr);
+    // Only show attens for current calendar month
+    const inMonth = dateStr.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`);
+    const dayLeaveOff=inMonth?attens.filter(a=>a.type==='dayoff'&&a.member&&a.startDate<=dateStr&&a.endDate>=dateStr):[];
+    const dayBiztrip=inMonth?attens.filter(a=>a.type==='biztrip'&&a.member&&a.startDate<=dateStr&&a.endDate>=dateStr):[];
     const offChips=dayLeaveOff.slice(0,2).map(a=>`<div class="atten-chip" style="background:#F0EFFE;color:#4A3CAD" title="${escHtml(a.member||'')} 排休">${escHtml(a.member||'')} 排休</div>`).join('');
     const bizChips=dayBiztrip.slice(0,2).map(a=>`<div class="atten-chip" style="background:#E6F1FB;color:#0C447C" title="${escHtml(a.member||'')} 公出">${escHtml(a.member||'')} 公出</div>`).join('');
-    html+=`<div class="cal-cell${(isWeekend||isHoliday)&&!isAdjWork?' weekend':''}${isToday?' today':''}${isHoliday&&!isAdjWork?' holiday':''}">
-      <div class="cal-date" style="${isHoliday&&!isAdjWork?'color:var(--text-3)':isAdjWork?'color:var(--accent)':''}">${d}${isHoliday&&!isAdjWork?'<span style="font-size:9px;color:var(--text-3);margin-left:2px">假</span>':''}${isAdjWork?'<span style="font-size:9px;color:var(--accent);margin-left:2px">班</span>':''}</div>
+    // cell background
+    let cellClass='cal-cell';
+    if(isToday) cellClass+=' today';
+    if(isAdjWork) cellClass+=' adjwork';
+    else if(isHoliday) cellClass+=' holiday';
+    else if(isWeekend) cellClass+=' weekend';
+    html+=`<div class="${cellClass}">
+      <div class="cal-date">${d}${isHoliday&&!isAdjWork?`<span class="cal-holiday-name">${escHtml(holidayName)}</span>`:''}${isAdjWork?'<span class="cal-adj-label">補班</span>':''}</div>
       ${chips}${offChips}${bizChips}${more}
     </div>`;
   }
@@ -2379,7 +2406,16 @@ function renderAttenLists(){
 
 function renderAttenList(type){
   const el=document.getElementById(type==='dayoff'?'dayoff-list':'biztrip-list'); if(!el) return;
-  const list=attens.filter(a=>a.type===type).sort((a,b)=>(b.startDate||'').localeCompare(a.startDate||''));
+  const yr=calYear||new Date().getFullYear();
+  const mo=calMonth!==undefined?calMonth:new Date().getMonth();
+  const monthStr=`${yr}-${String(mo+1).padStart(2,'0')}`;
+  // Only show attens overlapping current calendar month
+  const list=attens.filter(a=>{
+    if(a.type!==type) return false;
+    const s=(a.startDate||'').slice(0,7);
+    const e=(a.endDate||'').slice(0,7);
+    return s<=monthStr && e>=monthStr;
+  }).sort((a,b)=>(a.startDate||'').localeCompare(b.startDate||''));
   if(!list.length){ el.innerHTML=`<div class="atten-empty">尚無${type==='dayoff'?'排休':'公出'}紀錄</div>`; return; }
   const color=type==='dayoff'?'#4A3CAD':'#0C447C';
   const bg=type==='dayoff'?'#F0EFFE':'#E6F1FB';
