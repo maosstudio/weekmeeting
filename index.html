@@ -318,11 +318,7 @@ img.avatar{object-fit:cover}
 .cal-cell{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);min-height:88px;padding:6px;display:flex;flex-direction:column;gap:3px}
 .cal-cell.empty{background:none;border:none}
 .cal-cell.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
-.cal-cell.holiday{background:#FEF3EC}
 .cal-cell.weekend{background:#F5F5F3}
-.cal-cell.adjwork{background:#EAF2DE}
-.cal-holiday-name{font-size:9px;color:#B85C00;margin-left:3px;font-weight:500;vertical-align:middle}
-.cal-adj-label{font-size:9px;color:var(--accent);margin-left:3px;font-weight:500}
 .cal-date{font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:2px}
 .cal-cell.weekend .cal-date{color:var(--text-3)}
 .cal-leave-chip{font-size:10px;padding:2px 5px;border-radius:4px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1913,24 +1909,15 @@ async function ensureHolidaysLoaded(year){
 }
 
 
-function isWorkday(dateStr){
-  if(TW_WORKDAYS.has(dateStr)) return true;  // 調整上班日
-  const d = new Date(dateStr);
-  const dow = d.getDay(); // 0=Sun,6=Sat
-  if(dow===0||dow===6) return false;          // 週六日
-  if(TW_HOLIDAYS.has(dateStr)) return false; // 國定假日
-  return true;
-}
-
-// 計算兩個日期之間的工作天數（含首尾）
+// 計算工作天數（週一到週五，排除週六日）
 function countWorkdays(startStr, endStr){
   if(!startStr||!endStr) return 0;
   let count=0;
   let d=new Date(startStr);
   const end=new Date(endStr);
   while(d<=end){
-    const ds=d.toISOString().slice(0,10);
-    if(isWorkday(ds)) count++;
+    const dow=d.getDay();
+    if(dow!==0 && dow!==6) count++;
     d.setDate(d.getDate()+1);
   }
   return count;
@@ -2290,11 +2277,8 @@ function changeCalMonth(delta){
   renderAttenLists();
 }
 
-async function renderCalendar(){
+function renderCalendar(){
   if(calYear===undefined) initCalendar();
-  await ensureHolidaysLoaded(calYear);
-  // also preload next year if December
-  if(calMonth===11) fetchHolidaysForYear(calYear+1);
   const label=document.getElementById('cal-month-label');
   if(label) label.textContent=`${calYear} 年 ${calMonth+1} 月`;
 
@@ -2321,23 +2305,17 @@ async function renderCalendar(){
     }).join('');
     const more=dayLeaves.length>3?`<div class="cal-more">+${dayLeaves.length-3} 筆</div>`:'';
 
-    const isHoliday = TW_HOLIDAYS.has(dateStr);
-    const holidayName = TW_HOLIDAYS.get(dateStr)||'';
-    const isAdjWork = TW_WORKDAYS.has(dateStr);
     // Only show attens for current calendar month
     const inMonth = dateStr.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`);
     const dayLeaveOff=inMonth?attens.filter(a=>a.type==='dayoff'&&a.member&&a.startDate<=dateStr&&a.endDate>=dateStr):[];
     const dayBiztrip=inMonth?attens.filter(a=>a.type==='biztrip'&&a.member&&a.startDate<=dateStr&&a.endDate>=dateStr):[];
     const offChips=dayLeaveOff.slice(0,2).map(a=>`<div class="atten-chip" style="background:#F0EFFE;color:#4A3CAD" title="${escHtml(a.member||'')} 排休">${escHtml(a.member||'')} 排休</div>`).join('');
     const bizChips=dayBiztrip.slice(0,2).map(a=>`<div class="atten-chip" style="background:#E6F1FB;color:#0C447C" title="${escHtml(a.member||'')} 公出">${escHtml(a.member||'')} 公出</div>`).join('');
-    // cell background
     let cellClass='cal-cell';
     if(isToday) cellClass+=' today';
-    if(isAdjWork) cellClass+=' adjwork';
-    else if(isHoliday) cellClass+=' holiday';
     else if(isWeekend) cellClass+=' weekend';
     html+=`<div class="${cellClass}">
-      <div class="cal-date">${d}${isHoliday&&!isAdjWork?`<span class="cal-holiday-name">${escHtml(holidayName)}</span>`:''}${isAdjWork?'<span class="cal-adj-label">補班</span>':''}</div>
+      <div class="cal-date">${d}</div>
       ${chips}${offChips}${bizChips}${more}
     </div>`;
   }
