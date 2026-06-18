@@ -754,7 +754,7 @@ img.avatar{object-fit:cover}
 
           <!-- 報銷明細 -->
           <div class="ef-group">
-            <label>報銷明細（最多4筆）*</label>
+            <label>報銷明細 *</label>
             <table class="expense-items-table" id="ef-items-table">
               <thead>
                 <tr>
@@ -773,7 +773,7 @@ img.avatar{object-fit:cover}
                 </tr>
               </tfoot>
             </table>
-            <button class="btn" onclick="addExpenseItem()" style="margin-top:6px;font-size:12px;width:100%">＋ 新增明細</button>
+            <button class="btn" onclick="addExpenseItem()" style="margin-top:6px;font-size:12px;width:100%">＋ 新增一筆</button>
           </div>
 
           <!-- 憑證上傳 -->
@@ -2808,7 +2808,6 @@ function renderExpenseItemsTable(){
 }
 
 function addExpenseItem(){
-  if(expenseItems.length>=4){ toast('最多4筆明細'); return; }
   expenseItems.push({name:'',cat:'交通費',amount:''});
   renderExpenseItemsTable();
 }
