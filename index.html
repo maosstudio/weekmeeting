@@ -2911,10 +2911,20 @@ async function submitExpense(){
 
   expenses.unshift(expense);
   await saveExpensesToServer();
+
+  // 寄出通知信（非同步，失敗不影響提交）
+  if(hasApi){
+    fetch(apiUrl,{
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'newExpenseNotify', expense})
+    }).catch(e=>console.warn('通知信發送失敗:',e));
+  }
+
   renderExpenseList();
   resetExpenseForm();
   btn.disabled=false; btn.textContent='提交申請';
-  toast('✅ 報支申請已提交');
+  toast('✅ 報支申請已提交，通知信已寄出');
 }
 
 function resetExpenseForm(){
