@@ -348,6 +348,48 @@ img.avatar{object-fit:cover}
 .cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2)}
 .cal-legend-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
 
+/* ── 員工福利 ── */
+.benefits-layout{display:flex;flex-direction:column;gap:20px}
+.benefits-notice{background:var(--accent-bg);border:1px solid #b8d99a;border-radius:var(--r-md);padding:12px 16px;font-size:13px;color:var(--accent-text);display:flex;align-items:center;gap:8px}
+.benefit-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.benefit-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.benefit-card-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.benefit-card-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px}
+.benefit-card-title{font-size:14px;font-weight:600;color:var(--text)}
+.benefit-card-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+.benefit-card-body{padding:14px 16px;font-size:13px;color:var(--text-2);line-height:1.7}
+.benefit-card-body ul{padding-left:18px;margin:6px 0}
+.benefit-card-body li{margin-bottom:3px}
+.benefit-card-body strong{color:var(--text);font-weight:600}
+.benefit-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+.benefit-table th{background:var(--surface2);padding:5px 8px;text-align:left;font-weight:500;color:var(--text-3);border:1px solid var(--border)}
+.benefit-table td{padding:5px 8px;border:1px solid var(--border);color:var(--text-2)}
+.benefit-table tr:nth-child(even) td{background:var(--surface2)}
+.benefit-card-foot{padding:10px 16px;border-top:1px solid var(--border);background:var(--surface2)}
+.benefit-apply-btn{width:100%;padding:8px;border-radius:var(--r-sm);background:var(--accent);color:#fff;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:background .12s}
+.benefit-apply-btn:hover{background:#3d6b20}
+.benefit-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:100px;background:var(--accent-bg);color:var(--accent-text);font-weight:500;margin-left:6px;vertical-align:middle}
+
+/* 補助申請 modal */
+.benefit-form{display:flex;flex-direction:column;gap:12px}
+.benefit-form label{font-size:12px;font-weight:500;color:var(--text-2);display:block;margin-bottom:4px}
+.benefit-form input,.benefit-form select,.benefit-form textarea{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text);outline:none;font-family:var(--font);transition:border-color .12s}
+.benefit-form input:focus,.benefit-form select:focus,.benefit-form textarea:focus{border-color:var(--accent);background:var(--surface)}
+.benefit-form textarea{resize:vertical;min-height:60px}
+.benefit-form .ef-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* 申請紀錄 */
+.benefit-claims-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.benefit-claims-head{padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between}
+.benefit-claims-head h2{font-size:14px;font-weight:600;color:var(--text)}
+.benefit-claim-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px}
+.benefit-claim-row:last-child{border-bottom:none}
+.benefit-claim-row:hover{background:var(--surface2)}
+.benefit-claim-type{font-weight:500;color:var(--text);min-width:80px}
+.benefit-claim-meta{color:var(--text-3);font-size:12px;flex:1}
+.benefit-claim-amount{font-weight:600;color:var(--accent);flex-shrink:0}
+.benefit-claims-empty{text-align:center;color:var(--text-3);padding:24px;font-size:13px}
+
 /* 排休 / 公出 */
 .atten-chip{font-size:10px;padding:2px 5px;border-radius:4px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .atten-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);margin-top:20px}
@@ -368,6 +410,17 @@ img.avatar{object-fit:cover}
 .atten-del{background:none;border:none;color:var(--text-3);cursor:pointer;font-size:13px;padding:2px 5px;border-radius:3px}
 .atten-del:hover{color:var(--danger);background:var(--danger-bg)}
 .atten-empty{font-size:13px;color:var(--text-3);text-align:center;padding:20px}
+
+/* 排休 / 公出 並排 */
+.atten-two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:700px){.atten-two-col{grid-template-columns:1fr}}
+.atten-col-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.atten-col-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.atten-col-title{font-size:14px;font-weight:600;color:var(--text);margin-right:6px}
+.atten-col-month{font-size:12px;color:var(--text-3);font-weight:400}
+.atten-col-card .atten-list{padding:10px 12px;max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.atten-col-card .atten-list::-webkit-scrollbar{width:4px}
+.atten-col-card .atten-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
 /* ── 費用報支 ── */
 .expense-layout{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start}
@@ -869,13 +922,200 @@ img.avatar{object-fit:cover}
 </div>
 
 <div class="module-page" id="module-benefits">
-  <div class="module-placeholder">
-    <div class="placeholder-card">
-      <div class="placeholder-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M12 8a4 4 0 0 0-4-4c-2 0-3 2-2 4h6zM12 8a4 4 0 0 1 4-4c2 0 3 2 2 4h-6z"/></svg></div>
-      <h2>員工福利</h2>
-      <p>福利公告、活動資訊</p>
-      <p>線上申請員工福利補助</p>
-      <span class="placeholder-tag">規劃中，即將推出</span>
+  <div class="module-inner">
+    <div class="module-header">
+      <h1>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M12 8a4 4 0 0 0-4-4c-2 0-3 2-2 4h6zM12 8a4 4 0 0 1 4-4c2 0 3 2 2 4h-6z"/></svg>
+        員工福利
+      </h1>
+      <div class="sync-status">
+        <div class="sync-dot" id="benefit-sync-dot"></div>
+        <span id="benefit-sync-label">—</span>
+      </div>
+    </div>
+
+    <div class="benefits-layout">
+      <div class="benefits-notice">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v4M8 11h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        以下福利適用於<strong>正職員工</strong>（含勞健保）。補助申請每年 <strong>6月</strong> 與 <strong>12月</strong> 開放撥款，逾期視同放棄。
+      </div>
+
+      <div class="benefit-cards">
+
+        <!-- 一、基本福利 -->
+        <div class="benefit-card">
+          <div class="benefit-card-head">
+            <div class="benefit-card-icon" style="background:#EAF2DE">🏢</div>
+            <div>
+              <div class="benefit-card-title">基本福利制度</div>
+              <div class="benefit-card-sub">勞健保 · 年終 · 特休 · 生日禮金</div>
+            </div>
+          </div>
+          <div class="benefit-card-body">
+            <ul>
+              <li><strong>勞健保 & 勞退</strong>：依法辦理</li>
+              <li><strong>年終獎金</strong>：依績效核發，原則 1～2 個月</li>
+              <li><strong>特別休假</strong>：依勞基法年資給予</li>
+              <li><strong>生日禮金</strong>：生日當月由二姐發 <strong>NT$1,000</strong> 紅包 🎂</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 二、學習補助 -->
+        <div class="benefit-card">
+          <div class="benefit-card-head">
+            <div class="benefit-card-icon" style="background:#E6F1FB">📚</div>
+            <div>
+              <div class="benefit-card-title">學習補助<span class="benefit-tag">可申請</span></div>
+              <div class="benefit-card-sub">依年資補助，實報實銷</div>
+            </div>
+          </div>
+          <div class="benefit-card-body">
+            <table class="benefit-table">
+              <tr><th>年資</th><th>年補助上限</th></tr>
+              <tr><td>未滿1年</td><td>$3,000（按月比例）</td></tr>
+              <tr><td>滿1年</td><td>$4,000</td></tr>
+              <tr><td>滿2年</td><td>$5,000</td></tr>
+              <tr><td>滿3年</td><td>$6,000</td></tr>
+              <tr><td>滿4年</td><td>$7,000</td></tr>
+              <tr><td>滿5年</td><td>$8,000</td></tr>
+              <tr><td>滿6年</td><td>$9,000</td></tr>
+              <tr><td>滿7年以上</td><td>$10,000</td></tr>
+            </table>
+            <ul>
+              <li>可補助：陶藝、設計、攝影、行銷、品牌、Excel、書籍等</li>
+              <li>需提供報名收據或發票</li>
+              <li>學習後於月會或 LINE 分享</li>
+            </ul>
+          </div>
+          <div class="benefit-card-foot">
+            <button class="benefit-apply-btn" onclick="showBenefitApply('學習補助')">申請學習補助</button>
+          </div>
+        </div>
+
+        <!-- 三、員工旅遊 -->
+        <div class="benefit-card">
+          <div class="benefit-card-head">
+            <div class="benefit-card-icon" style="background:#FBEAF0">✈️</div>
+            <div>
+              <div class="benefit-card-title">員工旅遊補助<span class="benefit-tag">可申請</span></div>
+              <div class="benefit-card-sub">依年資補助，實報實銷</div>
+            </div>
+          </div>
+          <div class="benefit-card-body">
+            <table class="benefit-table">
+              <tr><th>年資</th><th>年補助上限</th></tr>
+              <tr><td>未滿1年</td><td>$2,000</td></tr>
+              <tr><td>滿1年</td><td>$3,000</td></tr>
+              <tr><td>滿2年</td><td>$4,000</td></tr>
+              <tr><td>滿3年</td><td>$5,000</td></tr>
+              <tr><td>滿4年</td><td>$6,000</td></tr>
+              <tr><td>滿5年</td><td>$7,000</td></tr>
+              <tr><td>滿6年</td><td>$8,000</td></tr>
+              <tr><td>滿7年</td><td>$9,000</td></tr>
+              <tr><td>滿8年以上</td><td>$10,000</td></tr>
+            </table>
+            <ul>
+              <li>旅遊形式不限，須為當年度完成</li>
+              <li>附上發票/收據及旅行紀錄或照片</li>
+              <li>不累計至下一年</li>
+            </ul>
+          </div>
+          <div class="benefit-card-foot">
+            <button class="benefit-apply-btn" onclick="showBenefitApply('旅遊補助')">申請旅遊補助</button>
+          </div>
+        </div>
+
+        <!-- 四、健康檢查 -->
+        <div class="benefit-card">
+          <div class="benefit-card-head">
+            <div class="benefit-card-icon" style="background:#FCEBEB">🏥</div>
+            <div>
+              <div class="benefit-card-title">健康檢查補助<span class="benefit-tag">可申請</span></div>
+              <div class="benefit-card-sub">每年 $3,000，滿5年 $5,000</div>
+            </div>
+          </div>
+          <div class="benefit-card-body">
+            <ul>
+              <li><strong>每人每年 $3,000</strong> 健檢補助（實報實銷）</li>
+              <li>滿 5 年年資者提高至 <strong>$5,000</strong></li>
+              <li>每年享有 <strong>1天有薪健檢假</strong></li>
+              <li>請假需提供預約或健檢證明</li>
+            </ul>
+          </div>
+          <div class="benefit-card-foot">
+            <button class="benefit-apply-btn" onclick="showBenefitApply('健康檢查補助')">申請健檢補助</button>
+          </div>
+        </div>
+
+        <!-- 五、員工購物 -->
+        <div class="benefit-card">
+          <div class="benefit-card-head">
+            <div class="benefit-card-icon" style="background:#FAEEDA">🛍️</div>
+            <div>
+              <div class="benefit-card-title">員工購物優惠</div>
+              <div class="benefit-card-sub">Mao's 商品員購八折</div>
+            </div>
+          </div>
+          <div class="benefit-card-body">
+            <ul>
+              <li>所有 <strong>Mao's 樂陶陶</strong> 商品享 <strong>8折</strong> 員工優惠</li>
+              <li>直接洽詢二姐辦理</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 六、志工假 -->
+        <div class="benefit-card">
+          <div class="benefit-card-head">
+            <div class="benefit-card-icon" style="background:#E1F5EE">🌿</div>
+            <div>
+              <div class="benefit-card-title">志工假制度</div>
+              <div class="benefit-card-sub">每年1天有薪志工假</div>
+            </div>
+          </div>
+          <div class="benefit-card-body">
+            <ul>
+              <li>每人每年 <strong>1天有薪假</strong></li>
+              <li>可參與動物收容所、社福單位等公益活動</li>
+              <li>需事前申請並提供活動資訊</li>
+              <li>活動後提供照片或簡要紀錄</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 七、月會共讀 -->
+        <div class="benefit-card">
+          <div class="benefit-card-head">
+            <div class="benefit-card-icon" style="background:#EEEDFE">📖</div>
+            <div>
+              <div class="benefit-card-title">月會書共讀</div>
+              <div class="benefit-card-sub">每年精選4本以上書籍</div>
+            </div>
+          </div>
+          <div class="benefit-card-body">
+            <ul>
+              <li>公司統一購書發放，<strong>免費</strong></li>
+              <li>主題：生活美學、品牌、身心靈、社會議題</li>
+              <li>月會進行內部分享討論</li>
+              <li>部分書籍邀請外部講者或延伸活動</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 申請紀錄 -->
+      <div class="benefit-claims-wrap">
+        <div class="benefit-claims-head">
+          <h2>我的補助申請紀錄</h2>
+          <select id="benefit-filter-member" onchange="renderBenefitClaims()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font)">
+            <option value="">全部成員</option>
+          </select>
+        </div>
+        <div id="benefit-claims-list"></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -3118,6 +3358,219 @@ function openDayDetail(dateStr){
     </div>`;
 }
 
+
+// ══════════════════════════════
+//  員工福利補助申請
+// ══════════════════════════════
+let benefitClaims = [];
+let benefitClaimsLoaded = false;
+let benefitSaveTimer = null;
+
+const BENEFIT_TYPES = ['學習補助','旅遊補助','健康檢查補助'];
+
+async function loadBenefitClaimsFromServer(){
+  setBenefitSyncStatus('syncing','同步中...');
+  if(!hasApi){
+    const raw=localStorage.getItem('wm-benefit-claims');
+    if(raw){ try{ benefitClaims=JSON.parse(raw); }catch(e){} }
+    benefitClaimsLoaded=true; initBenefitModule(); renderBenefitClaims();
+    setBenefitSyncStatus('error','離線模式'); return;
+  }
+  try{
+    const res=await gasGet({action:'getBenefitClaims'});
+    if(!res.ok) throw new Error(res.error);
+    benefitClaims=res.data&&res.data.claims?res.data.claims:[];
+    localStorage.setItem('wm-benefit-claims',JSON.stringify(benefitClaims));
+    benefitClaimsLoaded=true; initBenefitModule(); renderBenefitClaims();
+    setBenefitSyncStatus('synced','已同步');
+  }catch(err){
+    const raw=localStorage.getItem('wm-benefit-claims');
+    if(raw){ try{ benefitClaims=JSON.parse(raw); }catch(e){} }
+    benefitClaimsLoaded=true; initBenefitModule(); renderBenefitClaims();
+    setBenefitSyncStatus('error','連線失敗');
+  }
+}
+
+function setBenefitSyncStatus(type,label){
+  const dot=document.getElementById('benefit-sync-dot');
+  const lbl=document.getElementById('benefit-sync-label');
+  if(dot) dot.className='sync-dot'+(type==='synced'?' synced':type==='syncing'?' syncing':' error');
+  if(lbl) lbl.textContent=label;
+}
+
+function debounceSaveBenefitClaims(){
+  setBenefitSyncStatus('syncing','儲存中...');
+  clearTimeout(benefitSaveTimer);
+  benefitSaveTimer=setTimeout(saveBenefitClaimsToServer,800);
+}
+
+async function saveBenefitClaimsToServer(){
+  localStorage.setItem('wm-benefit-claims',JSON.stringify(benefitClaims));
+  if(!hasApi){ setBenefitSyncStatus('error','離線模式'); return; }
+  const payload=JSON.stringify({action:'saveBenefitClaims',claims:benefitClaims});
+  try{
+    await fetch(apiUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:payload});
+    setBenefitSyncStatus('synced','已儲存');
+  }catch(e){
+    try{ await gasSaveChunked(payload); setBenefitSyncStatus('synced','已儲存'); }
+    catch(e2){ setBenefitSyncStatus('synced','已暫存（同步中）'); setTimeout(saveBenefitClaimsToServer,6000); }
+  }
+}
+
+function initBenefitModule(){
+  const sel=document.getElementById('benefit-filter-member');
+  if(sel&&sel.options.length<=1){
+    members.filter(m=>m&&m.name).forEach(m=>{
+      const o=document.createElement('option');
+      o.value=m.name; o.textContent=m.name; sel.appendChild(o);
+    });
+  }
+}
+
+// ── 申請 modal ──
+function showBenefitApply(type){
+  const memberOptions=members.filter(m=>m&&m.name).map(m=>
+    `<option value="${escHtml(m.name)}">${escHtml(m.name)}</option>`).join('');
+  const today=new Date().toISOString().slice(0,10);
+
+  document.getElementById('modal-host').innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="width:420px">
+        <h3>申請${escHtml(type)}</h3>
+        <div class="benefit-form">
+          <div>
+            <label>申請人 *</label>
+            <select id="bc-member">${memberOptions}</select>
+          </div>
+          <div class="ef-row">
+            <div>
+              <label>申請日期 *</label>
+              <input type="date" id="bc-date" value="${today}"/>
+            </div>
+            <div>
+              <label>申請金額 (NTD) *</label>
+              <input type="number" id="bc-amount" placeholder="0" min="0"/>
+            </div>
+          </div>
+          <div>
+            <label>說明 / 用途</label>
+            <textarea id="bc-note" placeholder="請說明補助用途、活動名稱等..."></textarea>
+          </div>
+          <div>
+            <label>上傳收據/憑證（選填）</label>
+            <div class="receipt-upload-area" onclick="document.getElementById('bc-receipt-input').click()" style="padding:12px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-3)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p style="font-size:11px;margin-top:4px">點擊上傳圖片</p>
+              <input type="file" id="bc-receipt-input" accept="image/*" multiple style="display:none" onchange="handleBcReceiptUpload(event)"/>
+            </div>
+            <div class="receipt-preview" id="bc-receipt-preview"></div>
+          </div>
+        </div>
+        <div class="modal-btns" style="margin-top:14px">
+          <button class="btn" onclick="closeModal()">取消</button>
+          <button class="btn btn-primary" onclick="confirmBenefitApply('${escHtml(type)}')">提交申請</button>
+        </div>
+      </div>
+    </div>`;
+  // Reset receipt urls for this modal
+  window._bcReceiptUrls=[];
+}
+
+let _bcReceiptUrls=[];
+async function handleBcReceiptUpload(e){
+  const files=Array.from(e.target.files);
+  for(const file of files){
+    const tempId='bc-tmp-'+Date.now()+Math.random().toString(36).slice(2);
+    addReceiptPreview(tempId,null,true,'bc-receipt-preview');
+    const url=await uploadImageToCloud(file);
+    const finalUrl=url||(await fileToBase64(file));
+    _bcReceiptUrls.push(finalUrl);
+    updateReceiptPreview(tempId,finalUrl);
+  }
+  e.target.value='';
+}
+
+function addReceiptPreview(id,url,loading,containerId='ef-receipt-preview'){
+  const wrap=document.getElementById(containerId); if(!wrap) return;
+  const div=document.createElement('div');
+  div.className='receipt-thumb'; div.id=id;
+  div.innerHTML=loading
+    ?`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-3)">上傳中</div>`
+    :`<img src="${escHtml(url||'')}" onclick="openLightbox('${escHtml(url||'')}')"/>
+      <button class="receipt-thumb-del" onclick="removeReceiptByUrl('${escHtml(url||'')}',this.parentNode)">✕</button>`;
+  wrap.appendChild(div);
+}
+
+async function confirmBenefitApply(type){
+  const member=document.getElementById('bc-member')?.value;
+  const date=document.getElementById('bc-date')?.value;
+  const amount=parseFloat(document.getElementById('bc-amount')?.value)||0;
+  const note=document.getElementById('bc-note')?.value.trim();
+  if(!member){ toast('請選擇申請人'); return; }
+  if(!date){ toast('請填寫申請日期'); return; }
+  if(!amount){ toast('請填寫申請金額'); return; }
+
+  const claim={
+    id:'bc-'+Date.now(),
+    type, member, date, amount, note,
+    receiptUrls:[..._bcReceiptUrls],
+    status:'待審核',
+    createdAt:new Date().toISOString()
+  };
+  benefitClaims.unshift(claim);
+  closeModal();
+  renderBenefitClaims();
+  debounceSaveBenefitClaims();
+  toast(`✅ ${type}申請已提交`);
+  _bcReceiptUrls=[];
+}
+
+// ── 申請紀錄 ──
+function renderBenefitClaims(){
+  const el=document.getElementById('benefit-claims-list'); if(!el) return;
+  const filterMember=document.getElementById('benefit-filter-member')?.value||'';
+  let list=benefitClaims.filter(c=>!filterMember||c.member===filterMember);
+
+  if(!list.length){
+    el.innerHTML=`<div class="benefit-claims-empty">尚無補助申請紀錄</div>`;
+    return;
+  }
+
+  el.innerHTML=list.map(c=>{
+    const m=getMember(c.member);
+    const statusClass=c.status==='已核准'?'status-approved':c.status==='已退回'?'status-rejected':'status-pending';
+    return `<div class="benefit-claim-row">
+      ${avatarHtml(m,26)}
+      <div class="benefit-claim-type">${escHtml(c.type||'')}</div>
+      <div class="benefit-claim-meta">
+        ${escHtml(c.member)} · ${escHtml(c.date||'')}
+        ${c.note?` · ${escHtml(c.note.slice(0,30))}${c.note.length>30?'…':''}`:''}
+      </div>
+      <span class="expense-status-badge ${statusClass}" style="font-size:10px">${escHtml(c.status)}</span>
+      <div class="benefit-claim-amount">NT$ ${(c.amount||0).toLocaleString()}</div>
+      <select onchange="updateBenefitStatus('${c.id}',this.value)" style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font);margin-left:4px">
+        <option${c.status==='待審核'?' selected':''}>待審核</option>
+        <option${c.status==='已核准'?' selected':''}>已核准</option>
+        <option${c.status==='已退回'?' selected':''}>已退回</option>
+      </select>
+      <button class="leave-del" onclick="deleteBenefitClaim('${c.id}')" title="刪除">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function updateBenefitStatus(id,status){
+  const c=benefitClaims.find(x=>x.id===id);
+  if(c){ c.status=status; renderBenefitClaims(); debounceSaveBenefitClaims(); }
+}
+
+function deleteBenefitClaim(id){
+  if(!confirm('確定要刪除這筆申請嗎？')) return;
+  benefitClaims=benefitClaims.filter(c=>c.id!==id);
+  renderBenefitClaims(); debounceSaveBenefitClaims(); toast('已刪除');
+}
+
 function switchModule(name){
   document.querySelectorAll('.module-page').forEach(el=>{
     el.classList.toggle('active', el.id === 'module-'+name);
@@ -3140,6 +3593,10 @@ function switchModule(name){
   if(name==='expense'){
     if(!expensesLoaded) loadExpensesFromServer();
     else { initExpenseForm(); renderExpenseList(); }
+  }
+  if(name==='benefits'){
+    if(!benefitClaimsLoaded) loadBenefitClaimsFromServer();
+    else { initBenefitModule(); renderBenefitClaims(); }
   }
 }
 
