@@ -352,12 +352,13 @@ img.avatar{object-fit:cover}
 .benefits-layout{display:flex;flex-direction:column;gap:20px}
 .benefits-notice{background:var(--accent-bg);border:1px solid #b8d99a;border-radius:var(--r-md);padding:12px 16px;font-size:13px;color:var(--accent-text);display:flex;align-items:center;gap:8px}
 .benefit-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
-.benefit-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.benefit-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.benefit-card-body{flex:1}
 .benefit-card-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .benefit-card-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px}
 .benefit-card-title{font-size:14px;font-weight:600;color:var(--text)}
 .benefit-card-sub{font-size:11px;color:var(--text-3);margin-top:2px}
-.benefit-card-body{padding:14px 16px;font-size:13px;color:var(--text-2);line-height:1.7}
+.benefit-card-body{padding:14px 16px;font-size:13px;color:var(--text-2);line-height:1.7;flex:1}
 .benefit-card-body ul{padding-left:18px;margin:6px 0}
 .benefit-card-body li{margin-bottom:3px}
 .benefit-card-body strong{color:var(--text);font-weight:600}
@@ -464,7 +465,8 @@ img.avatar{object-fit:cover}
 .expense-history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .expense-history-head h2{font-size:15px;font-weight:600}
 .expense-filter-row{display:flex;gap:8px;flex-wrap:wrap}
-.expense-filter-row select{font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-family:var(--font)}
+.expense-filter-row select,.expense-filter-row input[type="date"]{font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-family:var(--font)}
+.filter-date-range{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-3)}
 
 .expense-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden}
 .expense-card-head{padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s}
@@ -901,6 +903,11 @@ img.avatar{object-fit:cover}
               <option value="已核准">已核准</option>
               <option value="已退回">已退回</option>
             </select>
+            <div class="filter-date-range">
+              <input type="date" id="expense-filter-from" onchange="renderExpenseList()" title="起始日期"/>
+              <span>～</span>
+              <input type="date" id="expense-filter-to" onchange="renderExpenseList()" title="結束日期"/>
+            </div>
           </div>
         </div>
         <div id="expense-list"></div>
@@ -1107,11 +1114,24 @@ img.avatar{object-fit:cover}
 
       <!-- 申請紀錄 -->
       <div class="benefit-claims-wrap">
-        <div class="benefit-claims-head">
-          <h2>我的補助申請紀錄</h2>
-          <select id="benefit-filter-member" onchange="renderBenefitClaims()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font)">
-            <option value="">全部成員</option>
-          </select>
+        <div class="benefit-claims-head" style="flex-wrap:wrap;gap:8px">
+          <h2>補助申請紀錄</h2>
+          <div class="expense-filter-row">
+            <select id="benefit-filter-member" onchange="renderBenefitClaims()">
+              <option value="">全部成員</option>
+            </select>
+            <select id="benefit-filter-type" onchange="renderBenefitClaims()">
+              <option value="">全部類型</option>
+              <option>學習補助</option>
+              <option>旅遊補助</option>
+              <option>健康檢查補助</option>
+            </select>
+            <div class="filter-date-range">
+              <input type="date" id="benefit-filter-from" onchange="renderBenefitClaims()" title="起始日期"/>
+              <span>～</span>
+              <input type="date" id="benefit-filter-to" onchange="renderBenefitClaims()" title="結束日期"/>
+            </div>
+          </div>
         </div>
         <div id="benefit-claims-list"></div>
       </div>
@@ -3211,10 +3231,14 @@ function renderExpenseList(){
   const filterType=document.getElementById('expense-filter-type')?.value||'';
   const filterStatus=document.getElementById('expense-filter-status')?.value||'';
 
+  const filterFrom=document.getElementById('expense-filter-from')?.value||'';
+  const filterTo=document.getElementById('expense-filter-to')?.value||'';
   let list=expenses.filter(e=>{
     if(filterMember&&e.member!==filterMember) return false;
     if(filterType&&e.type!==filterType) return false;
     if(filterStatus&&e.status!==filterStatus) return false;
+    if(filterFrom&&(e.applyDate||'')<filterFrom) return false;
+    if(filterTo&&(e.applyDate||'')>filterTo) return false;
     return true;
   });
 
@@ -3529,7 +3553,16 @@ async function confirmBenefitApply(type){
 function renderBenefitClaims(){
   const el=document.getElementById('benefit-claims-list'); if(!el) return;
   const filterMember=document.getElementById('benefit-filter-member')?.value||'';
-  let list=benefitClaims.filter(c=>!filterMember||c.member===filterMember);
+  const filterType=document.getElementById('benefit-filter-type')?.value||'';
+  const filterFrom=document.getElementById('benefit-filter-from')?.value||'';
+  const filterTo=document.getElementById('benefit-filter-to')?.value||'';
+  let list=benefitClaims.filter(c=>{
+    if(filterMember&&c.member!==filterMember) return false;
+    if(filterType&&c.type!==filterType) return false;
+    if(filterFrom&&(c.date||'')<filterFrom) return false;
+    if(filterTo&&(c.date||'')>filterTo) return false;
+    return true;
+  });
 
   if(!list.length){
     el.innerHTML=`<div class="benefit-claims-empty">尚無補助申請紀錄</div>`;
@@ -3539,7 +3572,7 @@ function renderBenefitClaims(){
   el.innerHTML=list.map(c=>{
     const m=getMember(c.member);
     const statusClass=c.status==='已核准'?'status-approved':c.status==='已退回'?'status-rejected':'status-pending';
-    return `<div class="benefit-claim-row">
+    return `<div class="benefit-claim-row" style="cursor:pointer" onclick="showBenefitClaimDetail('${c.id}')">
       ${avatarHtml(m,26)}
       <div class="benefit-claim-type">${escHtml(c.type||'')}</div>
       <div class="benefit-claim-meta">
@@ -3548,16 +3581,51 @@ function renderBenefitClaims(){
       </div>
       <span class="expense-status-badge ${statusClass}" style="font-size:10px">${escHtml(c.status)}</span>
       <div class="benefit-claim-amount">NT$ ${(c.amount||0).toLocaleString()}</div>
-      <select onchange="updateBenefitStatus('${c.id}',this.value)" style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font);margin-left:4px">
+      <select onchange="event.stopPropagation();updateBenefitStatus('${c.id}',this.value)" style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font);margin-left:4px" onclick="event.stopPropagation()">
         <option${c.status==='待審核'?' selected':''}>待審核</option>
         <option${c.status==='已核准'?' selected':''}>已核准</option>
         <option${c.status==='已退回'?' selected':''}>已退回</option>
       </select>
-      <button class="leave-del" onclick="deleteBenefitClaim('${c.id}')" title="刪除">
+      <button class="leave-del" onclick="event.stopPropagation();deleteBenefitClaim('${c.id}')" title="刪除">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
       </button>
     </div>`;
   }).join('');
+}
+
+function showBenefitClaimDetail(id){
+  const c=benefitClaims.find(x=>x.id===id); if(!c) return;
+  const m=getMember(c.member);
+  const statusClass=c.status==='已核准'?'status-approved':c.status==='已退回'?'status-rejected':'status-pending';
+  const receipts=c.receiptUrls&&c.receiptUrls.length
+    ?`<div style="margin-top:12px"><div style="font-size:11px;color:var(--text-3);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">憑證</div>
+      <div class="expense-receipts">${c.receiptUrls.map(u=>`<img class="expense-receipt-img" src="${escHtml(u)}" onclick="event.stopPropagation();openLightbox('${escHtml(u)}')" alt="憑證"/>`).join('')}</div></div>`
+    :'';
+
+  document.getElementById('modal-host').innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="width:420px">
+        <h3>${escHtml(c.type||'')}申請明細</h3>
+        <div class="expense-detail-grid" style="margin:14px 0 10px">
+          <div><dt>申請人</dt><dd style="display:flex;align-items:center;gap:6px">${avatarHtml(m,22)} ${escHtml(c.member)}</dd></div>
+          <div><dt>申請日期</dt><dd>${escHtml(c.date||'')}</dd></div>
+          <div><dt>補助類型</dt><dd>${escHtml(c.type||'')}</dd></div>
+          <div><dt>申請金額</dt><dd style="font-weight:600;color:var(--accent)">NT$ ${(c.amount||0).toLocaleString()}</dd></div>
+          <div style="grid-column:1/-1"><dt>狀態</dt><dd><span class="expense-status-badge ${statusClass}">${escHtml(c.status||'')}</span></dd></div>
+          ${c.note?`<div style="grid-column:1/-1"><dt>說明</dt><dd>${escHtml(c.note)}</dd></div>`:''}
+        </div>
+        ${receipts}
+        <div class="modal-btns" style="margin-top:16px">
+          <select onchange="updateBenefitStatus('${c.id}',this.value);document.querySelector('.modal h3').textContent='${escHtml(c.type||'')}申請明細'" style="font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font)">
+            <option${c.status==='待審核'?' selected':''}>待審核</option>
+            <option${c.status==='已核准'?' selected':''}>已核准</option>
+            <option${c.status==='已退回'?' selected':''}>已退回</option>
+          </select>
+          <button class="btn btn-danger" onclick="deleteBenefitClaim('${c.id}');closeModal()">刪除</button>
+          <button class="btn btn-primary" onclick="closeModal()" style="margin-left:auto">關閉</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function updateBenefitStatus(id,status){
