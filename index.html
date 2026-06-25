@@ -350,6 +350,34 @@ img.avatar{object-fit:cover}
 
 /* ── 員工福利 ── */
 .benefits-layout{display:flex;flex-direction:column;gap:20px}
+/* ── 員工通訊錄 ── */
+.contacts-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.contacts-search{flex:1;min-width:180px;font-size:13px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text);outline:none;font-family:var(--font)}
+.contacts-search:focus{border-color:var(--accent);background:var(--surface)}
+.contacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .15s,border-color .15s;cursor:pointer}
+.contact-card:hover{box-shadow:var(--shadow-md);border-color:var(--border-strong)}
+.contact-card-top{padding:20px 18px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;border-bottom:1px solid var(--border)}
+.contact-card-top .avatar{width:64px;height:64px;font-size:22px;margin-bottom:10px}
+.contact-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px}
+.contact-title{font-size:12px;color:var(--text-3);margin-bottom:4px}
+.contact-dept{font-size:11px;padding:2px 10px;border-radius:100px;background:var(--accent-bg);color:var(--accent-text);font-weight:500;display:inline-block}
+.contact-card-body{padding:12px 16px;display:flex;flex-direction:column;gap:7px}
+.contact-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2)}
+.contact-row svg{flex-shrink:0;color:var(--text-3)}
+.contact-row a{color:var(--accent);text-decoration:none}
+.contact-row a:hover{text-decoration:underline}
+.contact-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact-birthday{font-size:11px;color:var(--text-3);margin-top:4px;text-align:center;padding:6px;background:var(--surface2);border-top:1px solid var(--border)}
+
+/* 編輯 modal */
+.contact-form{display:flex;flex-direction:column;gap:10px}
+.contact-form label{font-size:12px;font-weight:500;color:var(--text-2);display:block;margin-bottom:3px}
+.contact-form input{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text);outline:none;font-family:var(--font);transition:border-color .12s}
+.contact-form input:focus{border-color:var(--accent);background:var(--surface)}
+.contact-form .ef-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.contact-empty{text-align:center;color:var(--text-3);padding:40px;font-size:13px}
+
 .benefits-notice{background:var(--accent-bg);border:1px solid #b8d99a;border-radius:var(--r-md);padding:12px 16px;font-size:13px;color:var(--accent-text);display:flex;align-items:center;gap:8px}
 .benefit-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
 .benefit-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
@@ -917,14 +945,29 @@ img.avatar{object-fit:cover}
 </div>
 
 <div class="module-page" id="module-contacts">
-  <div class="module-placeholder">
-    <div class="placeholder-card">
-      <div class="placeholder-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 2v20M12 7h4M12 11h4M12 15h4"/></svg></div>
-      <h2>員工通訊錄</h2>
-      <p>查看同事聯絡方式與部門資訊</p>
-      <p>含照片頭貼與快速聯繫</p>
-      <span class="placeholder-tag">規劃中，即將推出</span>
+  <div class="module-inner">
+    <div class="module-header">
+      <h1>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 2v20M12 7h4M12 11h4M12 15h4"/></svg>
+        員工通訊錄
+      </h1>
+      <div class="sync-status">
+        <div class="sync-dot" id="contacts-sync-dot"></div>
+        <span id="contacts-sync-label">—</span>
+      </div>
     </div>
+    <div class="contacts-toolbar">
+      <input class="contacts-search" id="contacts-search" placeholder="搜尋姓名、職稱、部門..." oninput="renderContacts()"/>
+      <button class="btn" onclick="showAddMemberModal()" style="display:flex;align-items:center;gap:6px;white-space:nowrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        新增成員
+      </button>
+      <button class="btn btn-primary" onclick="showEditContactModal(null)" style="display:flex;align-items:center;gap:6px;white-space:nowrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        編輯我的資訊
+      </button>
+    </div>
+    <div class="contacts-grid" id="contacts-grid"></div>
   </div>
 </div>
 
@@ -1224,6 +1267,52 @@ function loadMembersMeta() {
 
 function saveMembersMeta() {
   localStorage.setItem(LS_META, JSON.stringify(members));
+  // 成員異動後同步到 server（透過任務資料的 meta week）
+  debounceSave();
+}
+
+// 成員異動後同步所有需要成員清單的模組 UI
+function syncMembersToAllModules(){
+  // 任務模組
+  if(document.getElementById('module-tasks')?.classList.contains('active')) renderAll();
+  // 請假篩選下拉
+  const leaveFilter=document.getElementById('leave-filter');
+  if(leaveFilter){
+    const cur=leaveFilter.value;
+    while(leaveFilter.options.length>1) leaveFilter.remove(1);
+    members.filter(m=>m&&m.name).forEach(m=>{
+      const o=new Option(m.name,m.name);
+      leaveFilter.appendChild(o);
+    });
+    leaveFilter.value=cur;
+  }
+  // 費用申請成員下拉
+  const efMember=document.getElementById('ef-member');
+  if(efMember){
+    const cur=efMember.value;
+    while(efMember.options.length>0) efMember.remove(0);
+    members.filter(m=>m&&m.name).forEach(m=>efMember.appendChild(new Option(m.name,m.name)));
+    efMember.value=cur;
+  }
+  // 費用篩選
+  const expFilter=document.getElementById('expense-filter-member');
+  if(expFilter){
+    const cur=expFilter.value;
+    while(expFilter.options.length>1) expFilter.remove(1);
+    members.filter(m=>m&&m.name).forEach(m=>expFilter.appendChild(new Option(m.name,m.name)));
+    expFilter.value=cur;
+  }
+  // 福利篩選
+  const bcFilter=document.getElementById('benefit-filter-member');
+  if(bcFilter){
+    const cur=bcFilter.value;
+    while(bcFilter.options.length>1) bcFilter.remove(1);
+    members.filter(m=>m&&m.name).forEach(m=>bcFilter.appendChild(new Option(m.name,m.name)));
+    bcFilter.value=cur;
+  }
+  // 通訊錄
+  if(document.getElementById('module-contacts')?.classList.contains('active')) renderContacts();
+  // 排休/公出成員選項（在 modal 裡動態產生，不需要預先填）
 }
 
 function getMember(name) { return members.find(m=>m.name===name) || {name, bg:'#F0EEE9', fg:'#444', avatar:null}; }
@@ -1517,7 +1606,7 @@ function confirmAddMember() {
   state.weeks.forEach(w=>{ if(!w.tasks[name]) w.tasks[name]=[]; });
   closeModal();
   renderAll();
-  debounceSave();
+  syncMembersToAllModules();
   toast(`已新增成員「${name}」`);
 }
 
@@ -1570,7 +1659,7 @@ function confirmEditMember(oldName) {
       }
     });
   }
-  closeModal(); renderAll(); debounceSave();
+  closeModal(); renderAll(); syncMembersToAllModules();
   toast('成員資料已更新');
 }
 
@@ -1579,7 +1668,7 @@ function confirmDeleteMember(memberName) {
   members=members.filter(m=>m.name!==memberName);
   saveMembersMeta();
   state.weeks.forEach(w=>{ delete w.tasks[memberName]; });
-  closeModal(); renderAll(); debounceSave();
+  closeModal(); renderAll(); syncMembersToAllModules();
   toast(`已刪除成員「${memberName}」`);
 }
 
@@ -2318,19 +2407,22 @@ function encodeMembersToState(){
 
 function decodeMembersFromState(){
   if(!state.membersMeta||!state.membersMeta.length) return;
+  let changed=false;
   state.membersMeta.forEach(sm=>{
-    if(!sm || !sm.name) return; // 跳過無效成員資料
+    if(!sm || !sm.name) return;
     const local=members.find(m=>m.name===sm.name);
     if(local){
       if(sm.avatar) local.avatar=sm.avatar;
       local.bg=sm.bg||local.bg;
       local.fg=sm.fg||local.fg;
     } else {
-      // 新成員：加入 members list
       members.push({name:sm.name,bg:sm.bg||'#F0EEE9',fg:sm.fg||'#444',avatar:sm.avatar||null});
+      changed=true;
     }
   });
-  saveMembersMeta();
+  localStorage.setItem(LS_META, JSON.stringify(members));
+  // 有新成員加入時同步各模組
+  if(changed) setTimeout(syncMembersToAllModules, 100);
 }
 
 
@@ -3639,6 +3731,205 @@ function deleteBenefitClaim(id){
   renderBenefitClaims(); debounceSaveBenefitClaims(); toast('已刪除');
 }
 
+
+// ══════════════════════════════
+//  員工通訊錄
+// ══════════════════════════════
+// contactsData: {memberName -> {title, phone, email, lineId, dept, birthday}}
+let contactsData = {};
+let contactsLoaded = false;
+let contactsSaveTimer = null;
+
+async function loadContactsFromServer(){
+  setContactsSyncStatus('syncing','同步中...');
+  if(!hasApi){
+    const raw=localStorage.getItem('wm-contacts-data');
+    if(raw){ try{ contactsData=JSON.parse(raw); }catch(e){} }
+    contactsLoaded=true; renderContacts();
+    setContactsSyncStatus('error','離線模式'); return;
+  }
+  try{
+    const res=await gasGet({action:'getContacts'});
+    if(!res.ok) throw new Error(res.error);
+    contactsData=res.data&&res.data.contacts?res.data.contacts:{};
+    localStorage.setItem('wm-contacts-data',JSON.stringify(contactsData));
+    contactsLoaded=true; renderContacts();
+    setContactsSyncStatus('synced','已同步');
+  }catch(err){
+    const raw=localStorage.getItem('wm-contacts-data');
+    if(raw){ try{ contactsData=JSON.parse(raw); }catch(e){} }
+    contactsLoaded=true; renderContacts();
+    setContactsSyncStatus('error','連線失敗');
+  }
+}
+
+function setContactsSyncStatus(type,label){
+  const dot=document.getElementById('contacts-sync-dot');
+  const lbl=document.getElementById('contacts-sync-label');
+  if(dot) dot.className='sync-dot'+(type==='synced'?' synced':type==='syncing'?' syncing':' error');
+  if(lbl) lbl.textContent=label;
+}
+
+function debounceSaveContacts(){
+  setContactsSyncStatus('syncing','儲存中...');
+  clearTimeout(contactsSaveTimer);
+  contactsSaveTimer=setTimeout(saveContactsToServer,800);
+}
+
+async function saveContactsToServer(){
+  localStorage.setItem('wm-contacts-data',JSON.stringify(contactsData));
+  if(!hasApi){ setContactsSyncStatus('error','離線模式'); return; }
+  const payload=JSON.stringify({action:'saveContacts',contacts:contactsData});
+  try{
+    await fetch(apiUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:payload});
+    setContactsSyncStatus('synced','已儲存');
+  }catch(e){
+    try{ await gasSaveChunked(payload); setContactsSyncStatus('synced','已儲存'); }
+    catch(e2){ setContactsSyncStatus('synced','已暫存（同步中）'); setTimeout(saveContactsToServer,6000); }
+  }
+}
+
+// ── 渲染通訊錄 ──
+function renderContacts(){
+  const grid=document.getElementById('contacts-grid'); if(!grid) return;
+  const q=(document.getElementById('contacts-search')?.value||'').toLowerCase();
+
+  const list=members.filter(m=>{
+    if(!m||!m.name) return false;
+    if(!q) return true;
+    const c=contactsData[m.name]||{};
+    return (m.name+c.title+c.dept+c.email+c.phone+c.lineId).toLowerCase().includes(q);
+  });
+
+  if(!list.length){
+    grid.innerHTML=`<div class="contact-empty" style="grid-column:1/-1">找不到符合的成員</div>`;
+    return;
+  }
+
+  grid.innerHTML=list.map(m=>{
+    const c=contactsData[m.name]||{};
+    return `<div class="contact-card" onclick="showContactDetail('${escHtml(m.name)}')">
+      <div class="contact-card-top">
+        ${avatarHtml(m,64)}
+        <div class="contact-name">${escHtml(m.name)}</div>
+        ${c.title?`<div class="contact-title">${escHtml(c.title)}</div>`:'<div class="contact-title" style="color:var(--border)">—</div>'}
+        ${c.dept?`<span class="contact-dept">${escHtml(c.dept)}</span>`:''}
+      </div>
+      <div class="contact-card-body">
+        ${c.phone?`<div class="contact-row">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.91z"/></svg>
+          <a href="tel:${escHtml(c.phone)}" onclick="event.stopPropagation()">${escHtml(c.phone)}</a>
+        </div>`:''}
+        ${c.email?`<div class="contact-row">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <a href="mailto:${escHtml(c.email)}" onclick="event.stopPropagation()">${escHtml(c.email)}</a>
+        </div>`:''}
+        ${c.lineId?`<div class="contact-row">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>LINE: ${escHtml(c.lineId)}</span>
+        </div>`:''}
+        ${!c.phone&&!c.email&&!c.lineId?`<div style="font-size:12px;color:var(--text-3);text-align:center;padding:6px 0">尚未填寫聯絡資訊</div>`:''}
+      </div>
+      ${c.birthday?`<div class="contact-birthday">🎂 ${escHtml(c.birthday)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── 查看完整資訊 ──
+function showContactDetail(memberName){
+  const m=getMember(memberName);
+  const c=contactsData[memberName]||{};
+  document.getElementById('modal-host').innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="width:380px">
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 0 16px;border-bottom:1px solid var(--border);margin-bottom:16px">
+          ${avatarHtml(m,72)}
+          <div style="font-size:17px;font-weight:600;margin:10px 0 4px">${escHtml(m.name)}</div>
+          ${c.title?`<div style="font-size:13px;color:var(--text-3)">${escHtml(c.title)}</div>`:''}
+          ${c.dept?`<span class="contact-dept" style="margin-top:6px">${escHtml(c.dept)}</span>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+          ${c.phone?`<div class="contact-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.91z"/></svg><a href="tel:${escHtml(c.phone)}">${escHtml(c.phone)}</a></div>`:''}
+          ${c.email?`<div class="contact-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><a href="mailto:${escHtml(c.email)}">${escHtml(c.email)}</a></div>`:''}
+          ${c.lineId?`<div class="contact-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>LINE ID：${escHtml(c.lineId)}</span></div>`:''}
+          ${c.birthday?`<div class="contact-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>生日：${escHtml(c.birthday)}</span></div>`:''}
+        </div>
+        <div class="modal-btns" style="margin-top:18px">
+          <button class="btn" onclick="closeModal()">關閉</button>
+          <button class="btn btn-primary" onclick="closeModal();showEditContactModal('${escHtml(memberName)}')">編輯此資訊</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── 編輯自己的資訊 ──
+function showEditContactModal(memberName){
+  const memberOptions=members.filter(m=>m&&m.name).map(m=>
+    `<option value="${escHtml(m.name)}"${memberName&&m.name===memberName?' selected':''}>${escHtml(m.name)}</option>`
+  ).join('');
+
+  document.getElementById('modal-host').innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="width:400px">
+        <h3>編輯聯絡資訊</h3>
+        <div class="contact-form">
+          <div>
+            <label>選擇姓名（編輯自己）*</label>
+            <select id="ct-member" onchange="prefillContactForm(this.value)">${memberOptions}</select>
+          </div>
+          <div class="ef-row">
+            <div><label>職稱</label><input type="text" id="ct-title" placeholder="例：設計師"/></div>
+            <div><label>部門</label><input type="text" id="ct-dept" placeholder="例：設計部"/></div>
+          </div>
+          <div class="ef-row">
+            <div><label>電話</label><input type="tel" id="ct-phone" placeholder="09xx-xxx-xxx"/></div>
+            <div><label>Email</label><input type="email" id="ct-email" placeholder="xxx@maostudio.com"/></div>
+          </div>
+          <div class="ef-row">
+            <div><label>LINE ID</label><input type="text" id="ct-line" placeholder="LINE ID"/></div>
+            <div><label>生日</label><input type="text" id="ct-birthday" placeholder="例：03/15"/></div>
+          </div>
+        </div>
+        <div class="modal-btns" style="margin-top:16px">
+          <button class="btn" onclick="closeModal()">取消</button>
+          <button class="btn btn-primary" onclick="confirmEditContact()">儲存</button>
+        </div>
+      </div>
+    </div>`;
+
+  // 預填現有資料
+  setTimeout(()=>{
+    const sel=document.getElementById('ct-member');
+    if(sel) prefillContactForm(sel.value);
+  },30);
+}
+
+function prefillContactForm(memberName){
+  const c=contactsData[memberName]||{};
+  ['title','dept','phone','email','line','birthday'].forEach(field=>{
+    const el=document.getElementById('ct-'+field);
+    const key=field==='line'?'lineId':field;
+    if(el) el.value=c[key]||'';
+  });
+}
+
+function confirmEditContact(){
+  const memberName=document.getElementById('ct-member')?.value;
+  if(!memberName){ toast('請選擇姓名'); return; }
+  contactsData[memberName]={
+    title:   document.getElementById('ct-title')?.value.trim()||'',
+    dept:    document.getElementById('ct-dept')?.value.trim()||'',
+    phone:   document.getElementById('ct-phone')?.value.trim()||'',
+    email:   document.getElementById('ct-email')?.value.trim()||'',
+    lineId:  document.getElementById('ct-line')?.value.trim()||'',
+    birthday:document.getElementById('ct-birthday')?.value.trim()||'',
+  };
+  closeModal();
+  renderContacts();
+  debounceSaveContacts();
+  toast(`✅ ${memberName} 的聯絡資訊已更新`);
+}
+
 function switchModule(name){
   document.querySelectorAll('.module-page').forEach(el=>{
     el.classList.toggle('active', el.id === 'module-'+name);
@@ -3665,6 +3956,10 @@ function switchModule(name){
   if(name==='benefits'){
     if(!benefitClaimsLoaded) loadBenefitClaimsFromServer();
     else { initBenefitModule(); renderBenefitClaims(); }
+  }
+  if(name==='contacts'){
+    if(!contactsLoaded) loadContactsFromServer();
+    else renderContacts();
   }
 }
 
