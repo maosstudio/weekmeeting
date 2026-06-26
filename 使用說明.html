@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Mao's Studio 員工專區 — 使用說明</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#2D5016;--green-bg:#EAF2DE;--green-light:#f4f9ee;
+  --text:#1A1916;--text-2:#6B6860;--text-3:#9E9C96;
+  --border:#E2DFD8;--surface:#fff;--bg:#F7F6F2;
+  --r:10px;--font:'Noto Sans TC',system-ui,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+
+/* ── header ── */
+.hero{background:var(--green);color:#fff;padding:40px 0 32px;text-align:center}
+.hero-logo{width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:20px;font-weight:700}
+.hero h1{font-size:22px;font-weight:600;margin-bottom:6px}
+.hero p{font-size:14px;opacity:.8}
+
+/* ── layout ── */
+.container{max-width:860px;margin:0 auto;padding:32px 20px 60px}
+
+/* ── TOC ── */
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:32px}
+.toc h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:12px}
+.toc-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.toc-list a{font-size:14px;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px}
+.toc-list a:hover{text-decoration:underline}
+.toc-list .toc-icon{font-size:16px;width:24px;text-align:center}
+
+/* ── setup steps ── */
+.setup-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:32px}
+.setup-step{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.setup-step h3{font-size:14px;font-weight:600;margin-bottom:6px}
+.setup-step p{font-size:13px;color:var(--text-2)}
+.setup-step code{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:12px;color:var(--text);font-family:monospace}
+
+/* ── module overview ── */
+.module-overview{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:32px}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:10px}
+.module-emoji{font-size:22px;flex-shrink:0;margin-top:1px}
+.module-card h3{font-size:13px;font-weight:600;margin-bottom:3px}
+.module-card p{font-size:12px;color:var(--text-3)}
+
+/* ── section ── */
+.section{margin-bottom:36px}
+.section-head{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--green);color:#fff;border-radius:var(--r) var(--r) 0 0}
+.section-head .emoji{font-size:20px}
+.section-head h2{font-size:16px;font-weight:600}
+.section-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);padding:20px 24px;display:flex;flex-direction:column;gap:20px}
+
+.sub-section h3{font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sub-section h3::before{content:'';display:inline-block;width:3px;height:14px;background:var(--green);border-radius:2px}
+
+/* steps */
+.steps{list-style:none;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;gap:10px;font-size:13px;color:var(--text-2)}
+.steps li .n{width:22px;height:22px;border-radius:50%;background:var(--green-bg);color:var(--green);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+
+/* op table */
+.op-table{width:100%;border-collapse:collapse;font-size:13px}
+.op-table th{background:var(--bg);padding:8px 12px;text-align:left;font-weight:500;color:var(--text-3);border:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.op-table td{padding:8px 12px;border:1px solid var(--border);color:var(--text-2);vertical-align:top}
+.op-table tr:nth-child(even) td{background:#fafafa}
+.op-table strong,.kw{font-weight:500;color:var(--text)}
+
+/* tag list */
+.tag-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;padding:4px 10px;border-radius:100px;background:var(--green-bg);color:var(--green);border:1px solid #c5dfa0;font-weight:500}
+
+/* benefit list */
+.benefit-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.benefit-list li{font-size:13px;color:var(--text-2);display:flex;align-items:flex-start;gap:8px}
+.benefit-list li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* note */
+.note{background:var(--green-bg);border-left:3px solid var(--green);border-radius:0 6px 6px 0;padding:10px 14px;font-size:13px;color:var(--green)}
+
+/* faq */
+.faq{display:flex;flex-direction:column;gap:12px}
+.faq-item{background:var(--bg);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.faq-q{padding:12px 16px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none}
+.faq-q:hover{background:#eeede9}
+.faq-q::after{content:'＋';font-size:16px;color:var(--green);flex-shrink:0}
+.faq-item.open .faq-q::after{content:'－'}
+.faq-a{display:none;padding:10px 16px 14px;font-size:13px;color:var(--text-2);border-top:1px solid var(--border)}
+.faq-item.open .faq-a{display:block}
+
+/* footer */
+.footer{text-align:center;font-size:12px;color:var(--text-3);padding-top:32px;border-top:1px solid var(--border)}
+
+@media(max-width:600px){
+  .hero{padding:28px 16px 24px}
+  .hero h1{font-size:18px}
+  .setup-steps{grid-template-columns:1fr}
+  .section-body{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-logo">M</div>
+  <h1>Mao's Studio 員工專區</h1>
+  <p>使用說明 · 全功能指引</p>
+</div>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>目錄</h2>
+    <ul class="toc-list">
+      <li><a href="#setup"><span class="toc-icon">🚀</span>開始使用（第一次設定）</a></li>
+      <li><a href="#overview"><span class="toc-icon">🗂</span>介面總覽</a></li>
+      <li><a href="#tasks"><span class="toc-icon">☑️</span>週會任務管理</a></li>
+      <li><a href="#leave"><span class="toc-icon">📅</span>員工請假</a></li>
+      <li><a href="#schedule"><span class="toc-icon">🕐</span>班表 / 出勤行事曆</a></li>
+      <li><a href="#expense"><span class="toc-icon">🧾</span>費用報支</a></li>
+      <li><a href="#contacts"><span class="toc-icon">📋</span>員工通訊錄</a></li>
+      <li><a href="#benefits"><span class="toc-icon">🎁</span>員工福利</a></li>
+      <li><a href="#faq"><span class="toc-icon">❓</span>常見問題</a></li>
+    </ul>
+  </div>
+
+  <!-- 開始使用 -->
+  <div id="setup" class="section">
+    <div class="section-head"><span class="emoji">🚀</span><h2>開始使用（第一次設定）</h2></div>
+    <div class="section-body">
+      <div class="setup-steps" style="gap:12px;display:grid">
+        <div class="setup-step">
+          <div class="step-num">1</div>
+          <h3>開啟系統網址</h3>
+          <p>建議使用 <strong>Chrome</strong> 瀏覽器，輸入管理員提供的網址</p>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">2</div>
+          <h3>貼上 API 網址</h3>
+          <p>首次開啟會出現設定畫面，貼上管理員提供的 API 網址後點「連線並開始使用」</p>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">3</div>
+          <h3>確認連線成功</h3>
+          <p>右上角出現綠點「已同步」代表連線成功 ✅。之後打開不需要再設定</p>
+        </div>
+      </div>
+      <div class="note">💡 若右上角出現連線失敗，點「重新整理」按鈕，或點左側底部「⚙ 修改 API 設定」重新貼上網址。</div>
+    </div>
+  </div>
+
+  <!-- 介面總覽 -->
+  <div id="overview" class="section">
+    <div class="section-head"><span class="emoji">🗂</span><h2>介面總覽</h2></div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--text-2)">畫面最左側有六個圖示，點擊可切換不同功能模組：</p>
+      <div class="module-overview">
+        <div class="module-card"><span class="module-emoji">☑️</span><div><h3>週會任務管理</h3><p>填入每週代辦事項、討論區</p></div></div>
+        <div class="module-card"><span class="module-emoji">📅</span><div><h3>員工請假</h3><p>申請、編輯、查看請假紀錄</p></div></div>
+        <div class="module-card"><span class="module-emoji">🕐</span><div><h3>班表/出勤行事曆</h3><p>月曆、排休、公出</p></div></div>
+        <div class="module-card"><span class="module-emoji">🧾</span><div><h3>費用報支</h3><p>申請費用、查看歷史</p></div></div>
+        <div class="module-card"><span class="module-emoji">📋</span><div><h3>員工通訊錄</h3><p>查看同事聯絡資訊</p></div></div>
+        <div class="module-card"><span class="module-emoji">🎁</span><div><h3>員工福利</h3><p>查看福利、申請補助</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 週會任務管理 -->
+  <div id="tasks" class="section">
+    <div class="section-head"><span class="emoji">☑️</span><h2>週會任務管理</h2></div>
+    <div class="section-body">
+
+      <div class="sub-section">
+        <h3>填入個人待辦事項</h3>
+        <ol class="steps">
+          <li><span class="n">1</span>找到自己的名字卡片</li>
+          <li><span class="n">2</span>在輸入框輸入待辦事項，按 Enter 或點「新增」</li>
+          <li><span class="n">3</span>自動儲存並同步給所有人</li>
+        </ol>
+      </div>
+
+      <div class="sub-section">
+        <h3>任務操作</h3>
+        <table class="op-table">
+          <tr><th>操作</th><th>方式</th></tr>
+          <tr><td><strong>勾選完成</strong></td><td>點任務左側勾選框，再點一次取消</td></tr>
+          <tr><td><strong>修改內容</strong></td><td>直接點任務文字編輯，按 Enter 或點其他地方儲存</td></tr>
+          <tr><td><strong>刪除任務</strong></td><td>滑鼠移到任務上，點右側出現的 ✕</td></tr>
+          <tr><td><strong>拖移排序</strong></td><td>滑鼠移到任務上，拖曳左側六點圖示</td></tr>
+          <tr><td><strong>貼入網址</strong></td><td>直接貼網址，自動轉為可點擊連結</td></tr>
+          <tr><td><strong>附加連結</strong></td><td>點輸入框下方「🔗 附加超連結」，分別填名稱和網址</td></tr>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <h3>週次管理</h3>
+        <table class="op-table">
+          <tr><th>操作</th><th>方式</th></tr>
+          <tr><td><strong>切換週次</strong></td><td>點左側欄位的週次名稱</td></tr>
+          <tr><td><strong>新增週次</strong></td><td>點左側「＋ 新增本週」，輸入名稱後建立</td></tr>
+          <tr><td><strong>修改名稱</strong></td><td>點上方工具列的週次名稱直接編輯，Enter 儲存</td></tr>
+          <tr><td><strong>刪除週次</strong></td><td>滑鼠移到左側週次上，點右側 ×，確認後刪除（不可復原）</td></tr>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <h3>成員管理</h3>
+        <table class="op-table">
+          <tr><th>操作</th><th>方式</th></tr>
+          <tr><td><strong>新增成員</strong></td><td>點右上角「＋ 新增成員」，新增後同步到所有六個模組</td></tr>
+          <tr><td><strong>編輯成員</strong></td><td>點成員頭像，可修改名稱、顏色、上傳大頭貼</td></tr>
+          <tr><td><strong>刪除成員</strong></td><td>點頭像進入編輯，點「刪除成員」（該成員任務一併刪除）</td></tr>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <h3>週會討論事項（畫面左側欄位）</h3>
+        <table class="op-table">
+          <tr><th>操作</th><th>方式</th></tr>
+          <tr><td><strong>輸入文字</strong></td><td>直接點擊欄位輸入，離開後自動儲存</td></tr>
+          <tr><td><strong>插入連結</strong></td><td>點右上角「插入連結」，填入文字和網址</td></tr>
+          <tr><td><strong>插入圖片</strong></td><td>點「插入圖片」選擇檔案，或直接 Ctrl+V 貼截圖，或拖曳圖片進欄位</td></tr>
+          <tr><td><strong>放大圖片</strong></td><td>點擊圖片放大，點空白處或右上角 × 關閉</td></tr>
+          <tr><td><strong>移除圖片</strong></td><td>滑鼠移到圖片，點右上角 ×</td></tr>
+        </table>
+        <div class="note" style="margin-top:10px">💡 圖片上傳後所有人都看得到（透過圖床同步）。</div>
+      </div>
+
+      <div class="sub-section">
+        <h3>整合總覽</h3>
+        <p style="font-size:13px;color:var(--text-2)">點右上角「<strong>總覽</strong>」切換，查看所有成員本週任務和完成進度統計。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 員工請假 -->
+  <div id="leave" class="section">
+    <div class="section-head"><span class="emoji">📅</span><h2>員工請假</h2></div>
+    <div class="section-body">
+
+      <div class="sub-section">
+        <h3>申請請假</h3>
+        <ol class="steps">
+          <li><span class="n">1</span>點右上角「<strong>申請請假</strong>」按鈕</li>
+          <li><span class="n">2</span>選擇姓名、假別，填入起始和結束日期</li>
+          <li><span class="n">3</span>天數自動計算（只算週一到週五），可手動調整（半天填 0.5）</li>
+          <li><span class="n">4</span>填寫事由（選填），點「提交申請」</li>
+        </ol>
+      </div>
+
+      <div class="sub-section">
+        <h3>可選假別（共 11 種）</h3>
+        <div class="tag-wrap">
+          <span class="tag">事假</span><span class="tag">普通傷病假</span><span class="tag">婚假</span>
+          <span class="tag">喪假</span><span class="tag">產假</span><span class="tag">產檢假</span>
+          <span class="tag">陪產檢及陪產假</span><span class="tag">生理假</span>
+          <span class="tag">家庭照顧假</span><span class="tag">公假</span><span class="tag">特別休假</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <h3>編輯 / 刪除</h3>
+        <p style="font-size:13px;color:var(--text-2)">點任一筆紀錄右側的 ✏️ 編輯，或 🗑️ 刪除（會跳出確認視窗）。</p>
+      </div>
+
+      <div class="sub-section">
+        <h3>篩選</h3>
+        <p style="font-size:13px;color:var(--text-2)">上方篩選列可依<strong>成員</strong>篩選，查看特定人的請假紀錄。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 班表 -->
+  <div id="schedule" class="section">
+    <div class="section-head"><span class="emoji">🕐</span><h2>班表 / 出勤行事曆</h2></div>
+    <div class="section-body">
+
+      <div class="sub-section">
+        <h3>月曆</h3>
+        <ul class="benefit-list">
+          <li>上方左右箭頭切換月份</li>
+          <li>請假、排休、公出紀錄顯示在對應日期格子上</li>
+          <li><strong>點擊任一天格子</strong>，彈出當日所有出勤狀況（請假 / 排休 / 公出）</li>
+          <li>週六日底色為淺灰色</li>
+        </ul>
+      </div>
+
+      <div class="sub-section">
+        <h3>排休 / 公出</h3>
+        <table class="op-table">
+          <tr><th>功能</th><th>操作方式</th></tr>
+          <tr><td><strong>新增排休</strong></td><td>點月曆下方「排休」頁籤 → 「＋ 新增排休」，填入姓名、日期、備注</td></tr>
+          <tr><td><strong>新增公出</strong></td><td>點月曆下方「公出」頁籤 → 「＋ 新增公出」，填入姓名、日期、備注</td></tr>
+          <tr><td><strong>編輯 / 刪除</strong></td><td>點各筆紀錄右側的 ✏️ 或 🗑️</td></tr>
+        </table>
+        <div class="note" style="margin-top:10px">💡 排休和公出只顯示當月份的紀錄，切換月份後自動更新。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 費用報支 -->
+  <div id="expense" class="section">
+    <div class="section-head"><span class="emoji">🧾</span><h2>費用報支</h2></div>
+    <div class="section-body">
+
+      <div class="sub-section">
+        <h3>提交費用申請</h3>
+        <ol class="steps">
+          <li><span class="n">1</span>選擇申請人、填入申請日期</li>
+          <li><span class="n">2</span>選擇費用類型（差旅費 / 膳食費 / 交際應酬費 / 辦公雜支）</li>
+          <li><span class="n">3</span>填入費用摘要、預計/實際發生期間</li>
+          <li><span class="n">4</span>差旅費需額外填寫出差地點</li>
+          <li><span class="n">5</span>填寫報銷明細（名稱、類別、金額），可新增多筆，不限數量</li>
+          <li><span class="n">6</span>上傳憑證照片（發票、收據、登機證等）</li>
+          <li><span class="n">7</span>勾選是否已附上所有憑證，點「<strong>提交申請</strong>」</li>
+        </ol>
+        <div class="note" style="margin-top:10px">📧 提交後系統自動寄出通知信給管理員。</div>
+      </div>
+
+      <div class="sub-section">
+        <h3>合格報支項目說明</h3>
+        <table class="op-table">
+          <tr><th>類型</th><th>說明</th></tr>
+          <tr><td><strong>差旅費</strong></td><td>機票、高鐵、台鐵、計程車、大眾運輸、出差住宿（標準單/雙人房）</td></tr>
+          <tr><td><strong>膳食費</strong></td><td>招待客戶之餐敘，或符合規定之差旅每日膳雜費</td></tr>
+          <tr><td><strong>交際費</strong></td><td>維繫業務關係或專案推動所必需之應酬開銷</td></tr>
+          <tr><td><strong>辦公雜支</strong></td><td>經主管事前核准之耗材、書籍、郵電費等</td></tr>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <h3>查看歷史紀錄</h3>
+        <p style="font-size:13px;color:var(--text-2)">右側顯示所有申請紀錄，可依<strong>成員、費用類型、狀態、日期區間</strong>篩選。點任一筆展開查看完整明細和憑證照片，管理員可更改狀態（待審核 / 已核准 / 已退回）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 員工通訊錄 -->
+  <div id="contacts" class="section">
+    <div class="section-head"><span class="emoji">📋</span><h2>員工通訊錄</h2></div>
+    <div class="section-body">
+
+      <div class="sub-section">
+        <h3>查看同事資訊</h3>
+        <p style="font-size:13px;color:var(--text-2)">以卡片形式顯示所有成員的聯絡資訊，可在上方搜尋框輸入姓名、職稱或部門快速查找。點任一卡片查看完整資訊，可直接點電話撥打或點 Email 寄信。</p>
+      </div>
+
+      <div class="sub-section">
+        <h3>編輯自己的資訊</h3>
+        <ol class="steps">
+          <li><span class="n">1</span>點右上角「<strong>✏ 編輯我的資訊</strong>」</li>
+          <li><span class="n">2</span>選擇自己的名字</li>
+          <li><span class="n">3</span>填入職稱、部門、電話、Email、LINE ID、生日（例：03/15）</li>
+          <li><span class="n">4</span>點「儲存」，資訊同步給所有人</li>
+        </ol>
+      </div>
+
+      <div class="sub-section">
+        <h3>新增成員</h3>
+        <p style="font-size:13px;color:var(--text-2)">點「<strong>＋ 新增成員</strong>」，輸入姓名和選擇顏色後建立。新成員會同步出現在<strong>所有六個模組</strong>（任務、請假、班表、報支、通訊錄、福利）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 員工福利 -->
+  <div id="benefits" class="section">
+    <div class="section-head"><span class="emoji">🎁</span><h2>員工福利</h2></div>
+    <div class="section-body">
+
+      <div class="sub-section">
+        <h3>七大福利項目</h3>
+        <table class="op-table">
+          <tr><th>項目</th><th>內容摘要</th></tr>
+          <tr><td>🏢 基本福利</td><td>勞健保、勞退、年終獎金（依績效 1～2 個月）、生日禮金 $1,000</td></tr>
+          <tr><td>📚 學習補助</td><td>依年資 $3,000～$10,000，實報實銷，需分享學習心得</td></tr>
+          <tr><td>✈️ 旅遊補助</td><td>依年資 $2,000～$10,000，當年度完成、附收據及旅行紀錄</td></tr>
+          <tr><td>🏥 健康檢查補助</td><td>每年 $3,000（滿5年 $5,000），含1天有薪健檢假</td></tr>
+          <tr><td>🛍️ 員工購物優惠</td><td>Mao's 樂陶陶所有商品員購 8折</td></tr>
+          <tr><td>🌿 志工假</td><td>每年1天有薪假，參加公益活動，需事前申請</td></tr>
+          <tr><td>📖 月會書共讀</td><td>每年 4 本以上，公司購書免費，月會分享討論</td></tr>
+        </table>
+        <div class="note" style="margin-top:10px">📌 補助申請每年 <strong>6月</strong> 與 <strong>12月</strong> 開放撥款，逾期視同放棄。</div>
+      </div>
+
+      <div class="sub-section">
+        <h3>申請學習 / 旅遊 / 健檢補助</h3>
+        <ol class="steps">
+          <li><span class="n">1</span>點對應福利卡片下方的「申請」按鈕</li>
+          <li><span class="n">2</span>填入申請人、申請日期、金額、說明用途</li>
+          <li><span class="n">3</span>上傳收據或憑證（選填）</li>
+          <li><span class="n">4</span>點「提交申請」</li>
+        </ol>
+      </div>
+
+      <div class="sub-section">
+        <h3>查看申請紀錄</h3>
+        <p style="font-size:13px;color:var(--text-2)">頁面下方顯示所有補助申請，可依成員、補助類型、日期區間篩選。點任一筆查看完整細項（金額、說明、憑證），管理員可更改狀態（待審核 / 已核准 / 已退回）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div id="faq" class="section">
+    <div class="section-head"><span class="emoji">❓</span><h2>常見問題</h2></div>
+    <div class="section-body">
+      <div class="faq">
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentNode.classList.toggle('open')">右上角顯示「連線失敗」怎麼辦？</div>
+          <div class="faq-a">確認網路連線正常後點「重新整理」。若持續失敗，點左側欄位最底部「⚙ 修改 API 設定」，重新貼上管理員提供的 API 網址即可。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentNode.classList.toggle('open')">我填的資料其他人看不到？</div>
+          <div class="faq-a">右上角顯示「已儲存」才代表同步成功。若一直轉圈或顯示「儲存失敗」，稍等幾秒後系統會自動重試，或手動按「重新整理」再試一次。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentNode.classList.toggle('open')">新增成員後其他模組沒有出現？</div>
+          <div class="faq-a">切換到其他模組再切回來即可，或點右上角「重新整理」按鈕重新載入資料。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentNode.classList.toggle('open')">可以在手機上使用嗎？</div>
+          <div class="faq-a">可以，用手機瀏覽器開啟網址即可使用。點左上角選單圖示可開啟模組導覽列，版面會自動調整為單欄適合手機閱讀。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentNode.classList.toggle('open')">資料會不見嗎？</div>
+          <div class="faq-a">不會。所有資料存在公司 Google 帳號的 Sheets 試算表裡，關閉瀏覽器或重新整理頁面都不影響資料。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentNode.classList.toggle('open')">忘記 API 網址怎麼辦？</div>
+          <div class="faq-a">點左側欄位最底部「⚙ 修改 API 設定」，貼上管理員提供的 API 網址即可重新連線。API 網址格式為：https://script.google.com/macros/s/...../exec</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="this.parentNode.classList.toggle('open')">圖片上傳失敗怎麼辦？</div>
+          <div class="faq-a">系統會自動嘗試多個圖床，若全部失敗會暫存在你的瀏覽器本機（其他人看不到）。請確認網路正常後重試，或聯繫管理員。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Mao's Studio 員工專區 · 如有問題請聯繫系統管理員</p>
+  </div>
+
+</div>
+</body>
+</html>
