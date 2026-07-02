@@ -626,6 +626,271 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   .section-body{padding:16px}
 }
 
+
+/* ════════════════════════════════════════
+   RWD — 響應式設計
+   Breakpoints:
+   Mobile:  ≤ 480px
+   Tablet:  481px ~ 768px
+   Desktop: 769px+
+════════════════════════════════════════ */
+
+/* ── 基礎字體流體縮放 ── */
+:root {
+  font-size: clamp(14px, 1.6vw, 16px);
+}
+
+/* ════ MOBILE ≤ 480px ════ */
+@media (max-width: 480px) {
+  :root { font-size: 14px; }
+
+  /* Rail */
+  .module-rail {
+    width: 100%;
+    height: 56px;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    padding: 0 4px;
+    gap: 0;
+    z-index: 30;
+  }
+  .rail-logo { display: none; }
+  .rail-item {
+    flex: 1;
+    height: 48px;
+    width: auto;
+    border-radius: var(--r-sm);
+    flex-direction: column;
+    gap: 2px;
+  }
+  .rail-item svg { font-size: 18px; }
+  .rail-label { font-size: 9px; }
+
+  /* Layout */
+  .layout { margin-left: 0 !important; }
+  .module-inner {
+    margin-left: 0 !important;
+    padding: 12px !important;
+    padding-bottom: 72px !important; /* space for bottom rail */
+  }
+  .module-placeholder { margin-left: 0 !important; padding-bottom: 72px; }
+
+  /* Topbar */
+  .topbar { padding: 0 12px; height: 50px; }
+  .topbar-title { font-size: 13px; }
+  .topbar-sub { display: none; }
+  .view-toggle { display: none; }
+  .refresh-btn span { display: none; }
+  .refresh-btn { padding: 5px 7px; }
+
+  /* Sidebar (tasks module) */
+  .sidebar { left: 0 !important; width: 85vw; max-width: 280px; }
+  .main { margin-left: 0 !important; }
+
+  /* Member grid */
+  .member-grid { grid-template-columns: 1fr !important; gap: 10px; }
+  .member-card .card-head { padding: 10px 12px; }
+  .card-member-name { font-size: 13px; }
+
+  /* Content layout (discussion + grid) */
+  .content-layout { flex-direction: column !important; gap: 12px; }
+  .discussion-wrap { max-width: 100% !important; flex: none !important; }
+  .discussion-body { min-height: 160px !important; }
+
+  /* Leave */
+  .leave-stats { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+  .stat-value { font-size: 20px; }
+  .leave-table { font-size: 11px; }
+  .leave-table th, .leave-table td { padding: 6px 8px; }
+
+  /* Calendar */
+  .cal-grid { gap: 3px; }
+  .cal-cell { min-height: 52px !important; padding: 3px !important; }
+  .cal-date { font-size: 10px; }
+  .cal-leave-chip, .atten-chip { font-size: 9px; padding: 1px 3px; }
+  .cal-weekday { font-size: 9px; }
+  .cal-month-label { font-size: 13px; }
+  .atten-table-wrap { margin-top: 12px; }
+
+  /* Expense */
+  .expense-layout { gap: 16px; }
+  .expense-form-body { padding: 12px; max-height: none; }
+  .ef-row { grid-template-columns: 1fr !important; gap: 8px; }
+  .expense-history-head { flex-direction: column; align-items: flex-start; }
+  .expense-filter-row { flex-wrap: wrap; gap: 6px; }
+  .expense-filter-row select,
+  .expense-filter-row input[type="date"] { font-size: 12px; }
+  .expense-card-head { flex-wrap: wrap; gap: 6px; padding: 10px 12px; }
+  .expense-amount { font-size: 13px; }
+  .expense-detail-grid { grid-template-columns: 1fr !important; }
+  .expense-items-table { font-size: 11px; }
+  .expense-items-table th,
+  .expense-items-table td { padding: 4px 5px; }
+
+  /* Contacts */
+  .contacts-grid { grid-template-columns: 1fr !important; gap: 10px; }
+  .contact-card-top .avatar { width: 52px !important; height: 52px !important; font-size: 18px !important; }
+
+  /* Benefits */
+  .benefit-cards { grid-template-columns: 1fr !important; gap: 10px; }
+  .benefit-table { font-size: 11px; }
+  .benefits-notice { font-size: 12px; }
+  .benefit-claim-row { flex-wrap: wrap; gap: 6px; font-size: 12px; }
+  .benefit-claim-amount { font-size: 13px; }
+
+  /* Module header */
+  .module-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .module-header h1 { font-size: 16px; }
+  .module-header-right { flex-wrap: wrap; }
+
+  /* Stats */
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+  .stat-box { padding: 10px 12px; }
+  .stat-value { font-size: 22px; }
+
+  /* Overview table */
+  .overview-wrap { overflow-x: auto; }
+  .overview-table { font-size: 11px; min-width: 460px; }
+  .overview-table th, .overview-table td { padding: 8px 10px; }
+
+  /* Modal */
+  .modal { width: 92vw !important; padding: 16px !important; }
+  .leave-form-grid { grid-template-columns: 1fr !important; gap: 8px; }
+  .benefit-form .ef-row { grid-template-columns: 1fr !important; }
+  .contact-form .ef-row { grid-template-columns: 1fr !important; }
+
+  /* Guide */
+  .guide-wrap .hero { padding: 24px 16px 18px; }
+  .guide-wrap .hero h1 { font-size: 17px; }
+  .guide-wrap .container { padding: 16px 12px 80px; }
+  .guide-wrap .setup-steps { grid-template-columns: 1fr; }
+  .guide-wrap .module-overview { grid-template-columns: 1fr 1fr; }
+  .guide-wrap .section-body { padding: 14px; }
+  .guide-wrap .op-table { font-size: 11px; }
+  .guide-wrap .op-table th,
+  .guide-wrap .op-table td { padding: 6px 8px; }
+
+  /* Attendance */
+  .atten-section { padding: 10px; }
+  .atten-item { padding: 6px 8px; }
+
+  /* Week chips in nav */
+  .week-name { max-width: 120px; }
+}
+
+/* ════ TABLET 481px – 768px ════ */
+@media (min-width: 481px) and (max-width: 768px) {
+  :root { font-size: 14.5px; }
+
+  /* Rail — left side, narrower */
+  .module-rail { width: 52px; }
+  .rail-label { font-size: 8.5px; }
+  .layout { margin-left: 52px !important; }
+  .module-inner { margin-left: 52px !important; padding: 18px !important; }
+  .module-placeholder { margin-left: 52px !important; }
+  .sidebar { left: 52px !important; }
+
+  /* Member grid 2 cols */
+  .member-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+
+  /* Content layout */
+  .content-layout { flex-direction: column !important; }
+  .discussion-wrap { max-width: 100% !important; flex: none !important; }
+
+  /* Calendar */
+  .cal-cell { min-height: 64px !important; }
+  .cal-leave-chip, .atten-chip { font-size: 10px; }
+
+  /* Expense */
+  .expense-layout { grid-template-columns: 1fr !important; }
+  .ef-row { grid-template-columns: 1fr 1fr; }
+  .expense-filter-row { flex-wrap: wrap; gap: 6px; }
+
+  /* Contacts */
+  .contacts-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+
+  /* Benefits */
+  .benefit-cards { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+
+  /* Stats */
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Leave */
+  .leave-stats { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* Module header */
+  .module-header { flex-wrap: wrap; gap: 10px; }
+  .module-header-right { flex-wrap: wrap; }
+
+  /* Modal */
+  .modal { width: 88vw !important; }
+  .leave-form-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Sidebar (tasks) */
+  .main { margin-left: 180px !important; }
+  .sidebar { width: 180px; }
+
+  /* Overview table scroll */
+  .overview-wrap { overflow-x: auto; }
+  .overview-table { font-size: 12px; min-width: 500px; }
+
+  /* Guide */
+  .guide-wrap .module-overview { grid-template-columns: repeat(2, 1fr); }
+  .guide-wrap .setup-steps { grid-template-columns: repeat(2, 1fr); }
+  .guide-wrap .container { padding: 20px 16px 40px; }
+}
+
+/* ════ SMALL DESKTOP 769px – 1024px ════ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root { font-size: 14.5px; }
+
+  .member-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 14px; }
+  .benefit-cards { grid-template-columns: repeat(2, 1fr) !important; }
+  .contacts-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .leave-stats { grid-template-columns: repeat(4, 1fr) !important; }
+  .content-layout .discussion-wrap { max-width: 28% !important; }
+  .module-inner { padding: 20px !important; }
+}
+
+/* ════ LARGE DESKTOP ≥ 1025px ════ */
+@media (min-width: 1025px) {
+  .member-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .benefit-cards { grid-template-columns: repeat(3, 1fr) !important; }
+  .contacts-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important; }
+}
+
+/* ════ Touch 裝置優化 ════ */
+@media (hover: none) and (pointer: coarse) {
+  /* 增大可點擊區域 */
+  .task-del { opacity: 1 !important; padding: 4px 8px; }
+  .drag-handle { opacity: 0.5 !important; }
+  .task-item { padding: 9px 10px; }
+  .leave-del { opacity: 1 !important; }
+  .week-del-btn { opacity: 1 !important; }
+  .disc-img-remove { opacity: 1 !important; }
+  .nav-item { padding: 9px 10px; min-height: 40px; }
+  .add-btn, .btn { min-height: 38px; }
+  .expense-submit-btn { min-height: 44px; font-size: 15px; }
+  .benefit-apply-btn { min-height: 40px; }
+  .cal-cell { cursor: pointer; -webkit-tap-highlight-color: rgba(45,80,22,0.1); }
+  .contact-card { -webkit-tap-highlight-color: rgba(0,0,0,0.05); }
+  .faq-q { min-height: 48px; }
+  input, select, textarea { font-size: 16px !important; } /* prevent iOS zoom */
+}
+
+/* ════ Print ════ */
+@media print {
+  .module-rail, .sidebar, .topbar, .mobile-overlay { display: none !important; }
+  .module-inner, .main { margin: 0 !important; padding: 16px !important; }
+}
 </style>
 </head>
 <body>
