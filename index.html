@@ -4520,6 +4520,17 @@ async function saveContactsToServer(){
 }
 
 // ── 渲染通訊錄 ──
+function cleanBirthday(bd){
+  if(!bd) return '';
+  if(bd.length<=5) return bd;
+  const d=new Date(bd);
+  if(!isNaN(d.getTime())){
+    return String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
+  }
+  const match=bd.match(/(\d{1,2})[/\-](\d{1,2})/);
+  return match?String(match[1]).padStart(2,'0')+'/'+String(match[2]).padStart(2,'0'):'';
+}
+
 function renderContacts(){
   const grid=document.getElementById('contacts-grid'); if(!grid) return;
   const q=(document.getElementById('contacts-search')?.value||'').toLowerCase();
@@ -4560,8 +4571,9 @@ function renderContacts(){
         </div>`:''}
         ${c.birthday?`<div class="contact-row">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 3h-8M12 3v4"/><path d="M8 13h.01M12 13h.01M16 13h.01"/></svg>
-          <span>生日：${escHtml(c.birthday)}</span>
+          <span>生日：${escHtml(cleanBirthday(c.birthday))}</span>
         </div>`:''}
+        ${c.zodiac?`<div class="contact-row"><span style="font-size:13px;flex-shrink:0">⭐</span><span>${escHtml(c.zodiac)}</span></div>`:''}
         ${c.foodLike?`<div class="contact-row">
           <span style="font-size:13px;flex-shrink:0">😋</span>
           <span>愛吃：${escHtml(c.foodLike)}</span>
@@ -4593,7 +4605,8 @@ function showContactDetail(memberName){
           ${c.phone?`<div class="contact-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.91z"/></svg><a href="tel:${escHtml(c.phone)}">${escHtml(c.phone)}</a></div>`:''}
           ${c.email?`<div class="contact-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><a href="mailto:${escHtml(c.email)}">${escHtml(c.email)}</a></div>`:''}
           ${c.lineId?`<div class="contact-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>LINE ID：${escHtml(c.lineId)}</span></div>`:''}
-          ${c.birthday?`<div class="contact-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>生日：${escHtml(c.birthday)}</span></div>`:''}
+          ${c.birthday?`<div class="contact-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>生日：${escHtml(cleanBirthday(c.birthday))}</span></div>`:''}
+          ${c.zodiac?`<div class="contact-row"><span style="font-size:16px;flex-shrink:0">⭐</span><span>${escHtml(c.zodiac)}</span></div>`:''}
           ${c.foodLike?`<div class="contact-row"><span style="font-size:15px;flex-shrink:0">😋</span><span>喜歡吃：${escHtml(c.foodLike)}</span></div>`:''}
           ${c.foodDislike?`<div class="contact-row"><span style="font-size:15px;flex-shrink:0">🚫</span><span>不喜歡吃：${escHtml(c.foodDislike)}</span></div>`:''}
         </div>
@@ -4636,6 +4649,16 @@ function showEditContactModal(memberName){
             <div><label>喜歡吃的食物</label><input type="text" id="ct-food-like" placeholder="例：壽司、拉麵"/></div>
             <div><label>不喜歡吃的食物</label><input type="text" id="ct-food-dislike" placeholder="例：香菜、芹菜"/></div>
           </div>
+          <div>
+            <label>星座</label>
+            <select id="ct-zodiac" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);color:var(--text);font-family:var(--font)">
+              <option value="">請選擇</option>
+              <option>牡羊座♈</option><option>金牛座♉</option><option>雙子座♊</option>
+              <option>巨蟹座♋</option><option>獅子座♌</option><option>處女座♍</option>
+              <option>天秤座♎</option><option>天蠍座♏</option><option>射手座♐</option>
+              <option>摩羯座♑</option><option>水瓶座♒</option><option>雙魚座♓</option>
+            </select>
+          </div>
         </div>
         <div class="modal-btns" style="margin-top:16px">
           <button class="btn" onclick="closeModal()">取消</button>
@@ -4655,13 +4678,18 @@ function prefillContactForm(memberName){
   const c=contactsData[memberName]||{};
   const fieldMap={
     'title':'title','dept':'dept','phone':'phone','email':'email',
-    'line':'lineId','birthday':'birthday',
-    'food-like':'foodLike','food-dislike':'foodDislike'
+    'line':'lineId','food-like':'foodLike','food-dislike':'foodDislike'
   };
   Object.entries(fieldMap).forEach(([inputId,key])=>{
     const el=document.getElementById('ct-'+inputId);
     if(el) el.value=c[key]||'';
   });
+  // birthday: show MM/DD only
+  const bdEl=document.getElementById('ct-birthday');
+  if(bdEl) bdEl.value=cleanBirthday(c.birthday||'');
+  // zodiac
+  const zdEl=document.getElementById('ct-zodiac');
+  if(zdEl) zdEl.value=c.zodiac||'';
 }
 
 function confirmEditContact(){
@@ -4682,6 +4710,7 @@ function confirmEditContact(){
     email:       document.getElementById('ct-email')?.value.trim()||'',
     lineId:      document.getElementById('ct-line')?.value.trim()||'',
     birthday:    birthday,
+    zodiac:      document.getElementById('ct-zodiac')?.value||'',
     foodLike:    document.getElementById('ct-food-like')?.value.trim()||'',
     foodDislike: document.getElementById('ct-food-dislike')?.value.trim()||'',
   };
